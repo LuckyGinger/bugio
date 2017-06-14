@@ -1,1 +1,7 @@
+
+# Auto-save files
 *~
+
+
+# executable '.exe' files
+*.exe
