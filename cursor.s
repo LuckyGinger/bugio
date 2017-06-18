@@ -205,7 +205,7 @@ reset_text:
 
 
 // Test code that should be commented out
-.global _start
+/* .global _start
 _start:
 	bl ask
 	bl cursor_hide
@@ -243,7 +243,7 @@ _start:
 
 	mov r7, #1
 	svc #0
-
+*/
 
 ask:
 	sub sp, sp, #16
