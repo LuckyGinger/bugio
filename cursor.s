@@ -1,9 +1,4 @@
-.set STDIN, 0
-.set STDOUT, 1
-
-.set READ, 3
-.set WRITE, 4
-
+.include "system_calls.s"
 
 .data
 hide:
@@ -205,7 +200,7 @@ reset_text:
 
 
 // Test code that should be commented out
-/* .global _start
+/*.global _start
 _start:
 	bl ask
 	bl cursor_hide
