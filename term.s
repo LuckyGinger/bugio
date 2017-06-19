@@ -86,11 +86,12 @@ term_quit:
 
 
 // This is a test function that should generally be commented out
-.global _start
+/*.global _start
 _start:
 	bl term_init
 
 	sub sp, sp, #1 // Allocate input space
+*/
 while_loop:
 	mov r7, #READ
 	mov r0, #STDIN
