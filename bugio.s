@@ -1,20 +1,18 @@
  @ Start writing code
-@	.include "cursor.s"
-	.include "mov32.inc"
+.include "mov32.inc"
 
-	.set STDOUT, 1
+.set STDOUT, 1
+.set WRITE, 0x04
 
-	.set WRITE, 0x04
 
-	
-	@constant min bound
-	.set MIN, 0
-	
-	@constant max bound
-	.set MAX, 60
-	
-	.balign 4
-	.data
+@constant min bound
+.set MIN, 0
+
+@constant max bound
+.set MAX, 60
+
+.balign 4
+.data
 playerBody:
 	.ascii "#"
 	.set body_len, .-playerBody
@@ -29,7 +27,7 @@ player:
 	.set length, .-player
 	.word 30
 	.set player_len, .-length-player
-	
+
 	.balign 4
 	.text
 
@@ -46,7 +44,7 @@ drawPlayer:
 	svc #0
 
 	bx r3
-		
+
 gameLoop:
 	mov r4, lr
 
@@ -55,9 +53,9 @@ gameLoop:
 	bl drawPlayer
 
 	bx r4
-	
-	
-	.global _start
+
+
+.global _start
 _start:
 	bl gameLoop
 
