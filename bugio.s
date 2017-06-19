@@ -20,10 +20,10 @@ playerBody:
 	.set body_len, .-playerBody
 space:
 	.ascii " "
-	
+
 gameKey:
 	.skip 4
-	
+
 player:
 	.skip 1
 	.set length, .-player
@@ -35,8 +35,8 @@ player:
 
 //drawGame:
 //	mov r0, #MIN
-	
-	
+
+
 drawPlayer:
 	mov r3, lr
 	mov r0, #STDOUT
@@ -46,9 +46,7 @@ drawPlayer:
 	svc #0
 
 	bx r3
-	
-	
-
+		
 gameLoop:
 	mov r4, lr
 
@@ -66,4 +64,4 @@ _start:
 	mov r7, #1
 	svc #0
 
-	
+
