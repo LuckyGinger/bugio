@@ -1,6 +1,12 @@
  @ Start writing code
-	.include "cursor.s"
+@	.include "cursor.s"
+	.include "mov32.inc"
 
+	.set STDOUT, 1
+
+	.set WRITE, 0x04
+
+	
 	@constant min bound
 	.set MIN, 0
 	
@@ -10,7 +16,7 @@
 	.balign 4
 	.data
 playerBody:
-	.asciz "#"
+	.ascii "#"
 	.set body_len, .-playerBody
 space:
 	.ascii " "
@@ -22,7 +28,7 @@ player:
 	.skip 1
 	.set length, .-player
 	.word 30
-	.set player_len, .-length
+	.set player_len, .-length-player
 	
 	.balign 4
 	.text
@@ -34,14 +40,12 @@ player:
 drawPlayer:
 	mov r3, lr
 	mov r0, #STDOUT
-	movw r1, #:lower16:playerBody
-	movt r1, #:upper16:playerBody
+	mov32 r1, playerBody
 	mov r2, #body_len
 	mov r7, #WRITE
 	svc #0
 
-	mov lr, r3
-	bx lr
+	bx r3
 	
 	
 
@@ -52,8 +56,7 @@ gameLoop:
         bl cursor_home
 	bl drawPlayer
 
-	mov lr, r4
-	bx lr
+	bx r4
 	
 	
 	.global _start
