@@ -1,20 +1,18 @@
  @ Start writing code
-@ .include "cursor.s"
 .include "mov32.inc"
 
-	.set STDOUT, 1
+.set STDOUT, 1
+.set WRITE, 0x04
 
-	.set WRITE, 0x04
 
+@constant min bound
+.set MIN, 0
 
-	@constant min bound
-	.set MIN, 0
+@constant max bound
+.set MAX, 60
 
-	@constant max bound
-	.set MAX, 60
-
-	.balign 4
-	.data
+.balign 4
+.data
 playerBody:
 	.ascii "#"
 	.set body_len, .-playerBody
