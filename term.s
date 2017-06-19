@@ -66,7 +66,7 @@ _start:
 	bl term_init
 
 	sub sp, sp, #1 // Allocate input space
-*/
+
 while_loop:
 	mov r7, #READ
 	mov r0, #STDIN
@@ -133,3 +133,4 @@ test_non_zero:
 
 	add sp, sp, #4
 	bx lr
+*/
