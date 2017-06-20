@@ -23,9 +23,9 @@ gameKey:
 	.skip 4
 
 player:
-	.skip 1
-	.set length, .-player
-	.word 30
+	.skip 1 // 
+	.set length, .-player // length of 1
+	.word 30 // 30 
 	.set player_len, .-length-player
 
 	.balign 4
@@ -53,7 +53,6 @@ gameLoop:
 	bl drawPlayer
 
 	bx r4
-
 
 .global _start
 _start:
