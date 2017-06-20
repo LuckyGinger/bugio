@@ -54,8 +54,8 @@ gameLoop:
 	mov r4, lr
 
 	bl clear_screen
-//	bl cursor_home		ADD THIS LATER
-	bl locate
+	bl cursor_home
+
 
 /*.L1:
 	bl clear_screen
@@ -80,7 +80,6 @@ _start:
 	mov r9, #30  @ posX
 	mov r10, #20  @ posY
 
-
 	bl gameLoop
 	bl term_init
 
@@ -99,8 +98,8 @@ while_loop:
 	beq skip_print
 
 	ldrb r0, [sp]
-	bl isWASD
-//	bl p_byte
+//	bl isWASD
+	bl p_byte
 	@       mov r7, #WRITE
 	@       mov r0, #STDOUT
 	@       mov r1, sp
@@ -109,16 +108,6 @@ while_loop:
 skip_print:
 	ldrb r0, [sp]
 
-	cmp r0, #27 // Escape Key / Alt Key
-	bne while_loop // Go back if
-
-	add sp, sp, #1
-	bl term_quit
-
-	mov r7, #EXIT
-	svc #0
-
-isWASD:
 	cmp r0, #119     @ w
 	addeq r10, r10, #1
 
@@ -131,21 +120,29 @@ isWASD:
 	cmp r0, #100     @ d
 	addeq r9, r9, #1
 
+	mov r0, #0
+	
 	cmp r9, #40
 	bleq displaymessage
 
-	cmp r0, #27 // ESC key or alt key //mov r0, #0
-	bne while_loop
+/////////////////////////////////////
+/////////////////////////////////////
+	mov r3, sp
+	sub sp, sp, #4
 
-	bx lr
+	mov r12, #10		// Xavier Added this for testing purposes
+				// With this small piece you can display the message after 10 hits
+	mov r1, #10		// There is a draw back though and im tring to fix it
+	strb r1, [r3, #-1]!
 
-//	b display_guy
+	b test_non_zero
+////////////////////////////////////
 
 	mov r0, r1
 
 	cmp r0, #27
 
-	bne while_loop
+	//bne while_loop
 
 	add sp, sp, #1
 	bl term_quit
@@ -164,22 +161,22 @@ displaymessage:
 	
 increment_Xcounter:
 
-decrement_Xcounter:
+decrement_Xcounter:	
+	
+increment_Ycounter:	
 
-increment_Ycounter:
+decrement_Ycounter:	
 
-decrement_Ycounter:
-
-/*isWASD:
+isWASD:
 	mov r3, sp
-
+	
 	mov r12, #10
 
 	mov r1, #10     // Newline
 	strb r1, [r3, #-1]!
 
-	b test_non_zero*/
-
+	b test_non_zero
+	
 	// Print a byte as a number
 p_byte:
 	mov r3, sp // String pointer
@@ -202,7 +199,6 @@ while_digits:
 
 	mov r0, r1
 
-@*** The below block of code is not being used and so far i wont be needing it ***@
 test_non_zero:
 	cmp r0, #0
 	bne while_digits
@@ -217,3 +213,5 @@ test_non_zero:
 
 	add sp, sp, #4
 	bx lr
+
+	
