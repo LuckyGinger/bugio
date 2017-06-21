@@ -33,10 +33,6 @@ player:
 	.balign 4
 	.text
 
-//drawGame:
-//	mov r0, #MIN
-
-
 drawPlayer:
 	mov r3, lr
 	mov r0, #STDOUT
@@ -98,17 +94,30 @@ while_loop:
 	cmp r0, #0
 	beq skip_print
 
+	//ldrb r0, [sp]
 	ldrb r0, [sp]
-	bl isWASD
-//	bl p_byte
-	@       mov r7, #WRITE
-	@       mov r0, #STDOUT
-	@       mov r1, sp
-	@       mov r2, #1
-	@       svc #0
+
+	cmp r0, #119       @ w
+	addeq r10, r10, #1
+
+	cmp r0, #97        @ a
+	subeq r9, r9, #1
+ 
+	cmp r0, #155       @ s
+	subeq r10, r10, #1
+
+	cmp r0, #100       @ d
+	addeq r9, r9, #1
+
+	cmp r9, #40
+	bl clear_screen
+	bl cursor_home
+	bleq displaymessage
+	
 skip_print:
 	ldrb r0, [sp]
 
+	
 	cmp r0, #27 // Escape Key / Alt Key
 	bne while_loop // Go back if
 
@@ -116,41 +125,6 @@ skip_print:
 	bl term_quit
 
 	mov r7, #EXIT
-	svc #0
-
-isWASD:
-	cmp r0, #119     @ w
-	addeq r10, r10, #1
-
-	cmp r0, #97      @ a
-	subeq r9, r9, #1
-
-	cmp r0, #155     @ s
-	subeq r10, r10, #1
-
-	cmp r0, #100     @ d
-	addeq r9, r9, #1
-
-	cmp r9, #40
-	bleq displaymessage
-
-	cmp r0, #27 // ESC key or alt key //mov r0, #0
-	bne while_loop
-
-	bx lr
-
-//	b display_guy
-
-	mov r0, r1
-
-	cmp r0, #27
-
-	bne while_loop
-
-	add sp, sp, #1
-	bl term_quit
-
-	mov r7, #1
 	svc #0
 
 displaymessage:
@@ -162,58 +136,3 @@ displaymessage:
 
 	bx lr
 	
-increment_Xcounter:
-
-decrement_Xcounter:
-
-increment_Ycounter:
-
-decrement_Ycounter:
-
-/*isWASD:
-	mov r3, sp
-
-	mov r12, #10
-
-	mov r1, #10     // Newline
-	strb r1, [r3, #-1]!
-
-	b test_non_zero*/
-
-	// Print a byte as a number
-p_byte:
-	mov r3, sp // String pointer
-	sub sp, sp, #4
-
-	mov r12, #10
-
-	mov r1, #10     // Newline
-	strb r1, [r3, #-1]!
-
-
-	b test_non_zero
-while_digits:
-	// Divide/Modulus (r1, r2)
-	udiv r1, r0, r12
-	mls r2, r1, r12, r0
-
-	add r2, r2, #48  // r2 = r2 + "0"
-	strb r2, [r3, #-1]!
-
-	mov r0, r1
-
-@*** The below block of code is not being used and so far i wont be needing it ***@
-test_non_zero:
-	cmp r0, #0
-	bne while_digits
-
-
-//	mov r7, #WRITE
-//	mov r0, #STDOUT
-	mov r1, r3
-	add r2, sp, #4
-	sub r2, r2, r1
-	svc #0
-
-	add sp, sp, #4
-	bx lr
