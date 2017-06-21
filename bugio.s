@@ -46,41 +46,18 @@ drawPlayer:
 
 
 
-gameLoop:
-	mov r4, lr
-
-	bl clear_screen
-	bl cursor_home
-//	bl locate
-
-/*.L1:
-	bl clear_screen
-        bl cursor_home
-	bl drawPlayer
-	b .L0
-
-
-.L0:
-        mov r0, #STDIN
-	mov r1, r6
-	mov r2, #4096
-	mov r7, #READ
-	svc #0
-*/
-	mov lr, r4
-	bx lr
-
 
 .global _start
 _start:
 	mov r9, #20  @ posY
 	mov r10, #30  @ posX
 
-	bl draw_game
-
-	bl gameLoop
+	bl clear_screen
+	bl cursor_home
 	bl term_init
 
+	bl draw_game
+	
 	sub sp, sp, #1
 
 while_loop:
@@ -113,10 +90,9 @@ while_loop:
 	bl clear_screen
 	bl cursor_home
 	bl draw_game
-	
+
 skip_print:
 	ldrb r0, [sp]
-
 	
 	cmp r0, #27 // Escape Key / Alt Key
 	bne while_loop // Go back if
