@@ -73,9 +73,10 @@ gameLoop:
 
 .global _start
 _start:
-	mov r9, #30  @ posX
-	mov r10, #20  @ posY
+	mov r9, #20  @ posY
+	mov r10, #30  @ posX
 
+	bl draw_game
 
 	bl gameLoop
 	bl term_init
@@ -98,21 +99,20 @@ while_loop:
 	ldrb r0, [sp]
 
 	cmp r0, #119       @ w
-	addeq r10, r10, #1
-
-	cmp r0, #97        @ a
-	subeq r9, r9, #1
- 
-	cmp r0, #155       @ s
-	subeq r10, r10, #1
-
-	cmp r0, #100       @ d
 	addeq r9, r9, #1
 
-	cmp r9, #40
+	cmp r0, #97        @ a
+	subeq r10, r10, #1
+ 
+	cmp r0, #155       @ s
+	subeq r9, r9, #1
+
+	cmp r0, #100       @ d
+	addeq r10, r10, #1
+
 	bl clear_screen
 	bl cursor_home
-	bleq displaymessage
+	bl draw_game
 	
 skip_print:
 	ldrb r0, [sp]
