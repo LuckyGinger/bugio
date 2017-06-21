@@ -54,8 +54,8 @@ gameLoop:
 	mov r4, lr
 
 	bl clear_screen
-//	bl cursor_home		ADD THIS LATER
-	bl locate
+	bl cursor_home
+//	bl locate
 
 /*.L1:
 	bl clear_screen

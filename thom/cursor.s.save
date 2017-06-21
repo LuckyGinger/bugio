@@ -23,7 +23,23 @@ home:
 
 position:
 	.byte 27
-	.ascii "^[[<11>;<11>H"
+	.ascii "[0000;0000H
+        .set body_len, .-playerBody
+space:
+        .ascii " "
+
+message:
+        .asciz "hit 40"
+gameKey:
+        .skip 4
+posX:
+        .word 30
+posY:
+        .word 20
+player:
+        .skip 1
+        .set lenX, .-player
+"
 
 clear_l:
 	.byte 27
