@@ -23,7 +23,7 @@ home:
 
 position:
 	.byte 27
-	.ascii "^[0011;0011H"
+	.ascii "^[[<11>;<11>H"
 
 clear_l:
 	.byte 27

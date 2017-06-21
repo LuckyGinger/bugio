@@ -1,25 +1,12 @@
 .include "system_calls.s"
-.include "mov32.inc"
 
 .data
 // This is where we will store the old termios
 // struct, so we can restore it later.
-//.balign 4
+.balign 4
 termios:
 	.skip 60
-playerBody:
-	.ascii "#\0"
-gameKey:
-	.skip 4 // Game key passed
-player:
-        .skip 1 // X Position
-        .set lenX, .-player // lenY = 1 byte
-        .skip 1 // Y Position
-        .set lenY, .-lenX // lenX = 1 byte
-        .word 30 // 30  * 8 bits of memeory
-        .set info, .-lenX
-word:
-	.word 55
+
 
 .balign 4
 .text
@@ -73,13 +60,11 @@ term_quit:
 	pop {pc}
 
 
-.balign 4// This is a test function that should generally be commented out
-.global _start
+// This is a test function that should generally be commented out
+/*.global _start
 _start:
 	bl term_init
-	bl clear_screen
-	bl setPosition
-	bl drawPlayer
+
 	sub sp, sp, #1 // Allocate input space
 
 while_loop:
@@ -149,23 +134,4 @@ test_non_zero:
 	add sp, sp, #4
 	bx lr
 
-drawPlayer:
-        mov r3, lr
-        mov r0, #STDOUT
-        mov32 r1, playerBody
-        mov r2, #1
-        mov r7, #WRITE
-        svc #0
-
-        bx r3
-
-setPosition:
-	mov32 r5, player
-	mov r6, #20
-	mov r7, #30
-	strb r6, [r5]
-	strb r7, [r5], #4
-	ldrb r6, [r5]
-	ldrb r7, [r5], #4
-	ldrb r7, =word
-	ldrb r8, [r7]
+*/

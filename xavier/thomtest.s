@@ -13,9 +13,11 @@
 playerBody:
 	.asciz "#"
 	.set body_len, .-playerBody
-space:
-	.ascii " "
-
+array_line:
+	.ascii "|                                                    |\0"
+	.set array_Len, .-array_line
+//array_line2:
+//	.ascii "                                                    |\0"
 message:
 	.asciz "hit 40"
 gameKey:
@@ -30,56 +32,45 @@ player:
 	.skip 1
 	.set lenY, .-lenX-player
 
-	.balign 4
-	.text
-
-//drawGame:
-//	mov r0, #MIN
-
-
+.balign 4
+.text
 drawPlayer:
 	mov r3, lr
+
 	mov r0, #STDOUT
 	mov32 r1, playerBody
 	mov r2, #body_len
 	mov r7, #WRITE
 	svc #0
 
-	mov lr, r3
 	bx lr
 
+player_location:
+	mov r0, #STDOUT
+	mov32 r1, array_line
+	mov r2, #array_Len
+	sub r2, r2, r9
+	mov r7, #WRITE
+	svc #0
 
-
+	bx lr
 gameLoop:
 	mov r4, lr
 
+	bl cursor_hide
 	bl clear_screen
 	bl cursor_home
-//	bl locate
-
-/*.L1:
-	bl clear_screen
-        bl cursor_home
+	bl player_location
+	//bl locate
 	bl drawPlayer
-	b .L0
 
-
-.L0:
-        mov r0, #STDIN
-	mov r1, r6
-	mov r2, #4096
-	mov r7, #READ
-	svc #0
-*/
 	mov lr, r4
 	bx lr
-
 
 .global _start
 _start:
 	mov r9, #30  @ posX
 	mov r10, #20  @ posY
-
 
 	bl gameLoop
 	bl term_init
@@ -93,6 +84,8 @@ while_loop:
 	mov r1, sp
 	mov r2, #1
 	svc #0
+
+//	bl gameLoop
 
 	// If nothing was read, don't bother writing
 	cmp r0, #0
@@ -139,20 +132,6 @@ isWASD:
 
 	bx lr
 
-//	b display_guy
-
-	mov r0, r1
-
-	cmp r0, #27
-
-	bne while_loop
-
-	add sp, sp, #1
-	bl term_quit
-
-	mov r7, #1
-	svc #0
-
 displaymessage:
 	mov r0, #STDOUT
 	mov32 r1, message
@@ -161,7 +140,27 @@ displaymessage:
 	svc #0
 
 	bx lr
-	
+
+
+
+@***** All code below here is currently not being used *****@
+@
+@//	b display_guy
+/*
+@	mov r0, r1
+@
+@	cmp r0, #27
+@
+@	bne while_loop
+@
+@	add sp, sp, #1
+@	bl term_quit
+@
+@	mov r7, #1
+@	svc #0
+*/
+
+/*
 increment_Xcounter:
 
 decrement_Xcounter:
@@ -170,22 +169,14 @@ increment_Ycounter:
 
 decrement_Ycounter:
 
-/*isWASD:
-	mov r3, sp
 
-	mov r12, #10
-
-	mov r1, #10     // Newline
-	strb r1, [r3, #-1]!
-
-	b test_non_zero*/
-
-	// Print a byte as a number
-p_byte:
-	mov r3, sp // String pointer
-	sub sp, sp, #4
-
-	mov r12, #10
+@*** Everything below here I dont need in this program  ***@
+// Print a byte as a number			    	   @
+p_byte:							   @
+	mov r3, sp // String pointer			   @
+	sub sp, sp, #4					   @
+//							   @
+	mov r12, #10					   @
 
 	mov r1, #10     // Newline
 	strb r1, [r3, #-1]!
@@ -217,3 +208,4 @@ test_non_zero:
 
 	add sp, sp, #4
 	bx lr
+*/
