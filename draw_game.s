@@ -25,10 +25,10 @@ side_wall:
 	.set wall_len, .-side_wall
 
 .text
-.global _start
-_start:
-	mov r9, #20     @ Test row for Bugio, This code should eventually be commented out
-	mov r10, #30    @ Test Column for bugio, Eventually will be commented out
+.global draw_game
+draw_game:
+@	mov r9, #20     @ Test row for Bugio, This code should eventually be commented out
+@	mov r10, #30    @ Test Column for bugio, Eventually will be commented out
 	mov r11, #21    @ Screen Height
 	mov r12, #1    @ Counter to track row number
 
