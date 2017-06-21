@@ -54,6 +54,7 @@ _start:
 
 	bl clear_screen
 	bl cursor_home
+	bl cursor_hide
 	bl term_init
 
 	bl draw_game
@@ -76,13 +77,13 @@ while_loop:
 	ldrb r0, [sp]
 
 	cmp r0, #119       @ w
-	addeq r9, r9, #1
+	subeq r9, r9, #1
 
 	cmp r0, #97        @ a
 	subeq r10, r10, #1
  
-	cmp r0, #155       @ s
-	subeq r9, r9, #1
+	cmp r0, #115       @ s
+	addeq r9, r9, #1
 
 	cmp r0, #100       @ d
 	addeq r10, r10, #1
@@ -90,6 +91,7 @@ while_loop:
 	bl clear_screen
 	bl cursor_home
 	bl draw_game
+	
 
 skip_print:
 	ldrb r0, [sp]
@@ -99,7 +101,9 @@ skip_print:
 
 	add sp, sp, #1
 	bl term_quit
-
+	
+	bl cursor_show  // need to re-show the cursor
+	
 	mov r7, #EXIT
 	svc #0
 
