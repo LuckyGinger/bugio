@@ -125,4 +125,6 @@ bugirow:
 	mov r7, #WRITE           @ This makes you only print the number of spaces up to Bugio
 	svc #0
 
+	sub r10, r10, #1
+
 	b draw_frame
