@@ -54,8 +54,8 @@ gameLoop:
 
 .global _start
 _start:
-	mov r9, #20  @ posY
-	mov r10, #30  @ posX
+	mov r9, #20  @ posY - init
+	mov r10, #30  @ posX - init
 
 	bl gameLoop
 
