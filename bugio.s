@@ -30,9 +30,8 @@ player:
 	.skip 1
 	.set lenY, .-lenX-player
 
-	.balign 4
-	.text
-
+.balign 4
+.text
 drawPlayer:
 	mov r3, lr
 	mov r0, #STDOUT
@@ -44,25 +43,25 @@ drawPlayer:
 	mov lr, r3
 	bx lr
 
-
-
+.global gameLoop
 gameLoop:
 	mov r4, lr
-
 	bl clear_screen
 	bl cursor_home
-
+	bl cursor_hide
 	mov lr, r4
 	bx lr
 
-
 .global _start
 _start:
-	mov r9, #30  @ posX
-	mov r10, #20  @ posY
+	mov r9, #20  @ posY
+	mov r10, #30  @ posX
 
 	bl gameLoop
+
 	bl term_init
+
+	bl draw_game
 
 	sub sp, sp, #1
 
@@ -93,8 +92,9 @@ while_loop:
 	beq addRight
 
 continue_while_loop:
-	cmp r9, #40
-	bleq displaymessage
+	bl cursor_home
+	bl clear_screen
+	bl draw_game
 
 	cmp r0, #27
 	bne while_loop
@@ -108,20 +108,27 @@ skip_print:
 	add sp, sp, #1
 	bl term_quit
 
+	bl cursor_show  // need to re-show the cursor
+
 	mov r7, #EXIT
 	svc #0
 
+@*** Added this code below Xavier ***@
 addUp:
-	add r9, r9, #1
+	cmp r9, #20	@ Added this to make guy not go past the floor
+	addlt r9, r9, #1
 	b continue_while_loop
 subLeft:
-	sub r10, r10, #1
+	cmp r10, #1		@ Added this code to not make guy go past left wall
+	subgt r10, r10, #1
 	b continue_while_loop
 addRight:
-	add r10, r10, #1
+	cmp r10, #60		@ Added this code to make guy go past Right Wall
+	addlt r10, r10, #1
 	b continue_while_loop
 subDown:
-	sub r9, r9, #1
+	cmp r9, #1		@ Added this code to stop guy from going to high
+	subgt r9, r9, #1
 	b continue_while_loop
 
 displaymessage:

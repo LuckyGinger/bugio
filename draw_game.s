@@ -27,6 +27,7 @@ side_wall:
 .text
 .global draw_game
 draw_game:
+	mov r3, lr
 @	mov r9, #20     @ Test row for Bugio, This code should eventually be commented out
 @	mov r10, #30    @ Test Column for bugio, Eventually will be commented out
 	mov r11, #21    @ Screen Height
@@ -51,8 +52,10 @@ draw_topBot:
 	cmp r12, r11
 	bne draw_leftWall
 
-	mov r7, #EXIT
-	svc #0
+	mov lr, r3
+	bx lr
+@	mov r7, #EXIT
+@	svc #0
 
 draw_leftWall:
         mov r0, #STDOUT
@@ -73,7 +76,7 @@ draw_space:
 	mov r7, #WRITE
 	svc #0
 
-draw_game:
+draw_frame:
 	@ Draw the Right wall
 	mov r0, #STDOUT
 	mov32 r1, side_wall
@@ -122,4 +125,6 @@ bugirow:
 	mov r7, #WRITE           @ This makes you only print the number of spaces up to Bugio
 	svc #0
 
-	b draw_game
+	sub r10, r10, #1
+
+	b draw_frame
