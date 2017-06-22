@@ -11,7 +11,7 @@
 .balign 4
 .data
 playerBody:
-	.asciz "#"
+	.asciz "#\n"
 	.set body_len, .-playerBody
 space:
 	.ascii " "
@@ -51,22 +51,7 @@ gameLoop:
 
 	bl clear_screen
 	bl cursor_home
-//	bl locate
 
-/*.L1:
-	bl clear_screen
-        bl cursor_home
-	bl drawPlayer
-	b .L0
-
-
-.L0:
-        mov r0, #STDIN
-	mov r1, r6
-	mov r2, #4096
-	mov r7, #READ
-	svc #0
-*/
 	mov lr, r4
 	bx lr
 
@@ -75,7 +60,6 @@ gameLoop:
 _start:
 	mov r9, #30  @ posX
 	mov r10, #20  @ posY
-
 
 	bl gameLoop
 	bl term_init
@@ -94,30 +78,30 @@ while_loop:
 	cmp r0, #0
 	beq skip_print
 
-	//ldrb r0, [sp]
 	ldrb r0, [sp]
 
-	cmp r0, #119       @ w
-	addeq r10, r10, #1
-
 	cmp r0, #97        @ a
-	subeq r9, r9, #1
- 
-	cmp r0, #155       @ s
-	subeq r10, r10, #1
+	beq subLeft
+
+	cmp r0, #119       @ w
+	beq subDown
+
+	cmp r0, #115       @ s
+	beq addUp
 
 	cmp r0, #100       @ d
-	addeq r9, r9, #1
+	beq addRight
 
+continue_while_loop:
 	cmp r9, #40
-	bl clear_screen
-	bl cursor_home
 	bleq displaymessage
-	
+
+	cmp r0, #27
+	bne while_loop
+
 skip_print:
 	ldrb r0, [sp]
 
-	
 	cmp r0, #27 // Escape Key / Alt Key
 	bne while_loop // Go back if
 
@@ -127,12 +111,25 @@ skip_print:
 	mov r7, #EXIT
 	svc #0
 
+addUp:
+	add r9, r9, #1
+	b continue_while_loop
+subLeft:
+	sub r10, r10, #1
+	b continue_while_loop
+addRight:
+	add r10, r10, #1
+	b continue_while_loop
+subDown:
+	sub r9, r9, #1
+	b continue_while_loop
+
 displaymessage:
 	mov r0, #STDOUT
 	mov32 r1, message
-	mov r2, #6
+	mov r2, #7
 	mov r7, #WRITE
 	svc #0
 
 	bx lr
-	
+
