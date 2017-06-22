@@ -15,9 +15,7 @@ playerBody:
 	.set body_len, .-playerBody
 space:
 	.ascii " "
-spider:
-	.ascii "  / _ \\n\_\(_)/_/\n_/\/o\\_\n/   \\0"
-	.set spider_Len, .-spider
+
 message:
 	.asciz "hit 40"
 gameKey:
@@ -32,8 +30,9 @@ player:
 	.skip 1
 	.set lenY, .-lenX-player
 
-.balign 4
-.text
+	.balign 4
+	.text
+
 drawPlayer:
 	mov r3, lr
 	mov r0, #STDOUT
@@ -45,26 +44,37 @@ drawPlayer:
 	mov lr, r3
 	bx lr
 
-.global gameLoop
+
+
+<<<<<<< HEAD
 gameLoop:
 	mov r4, lr
+
 	bl clear_screen
 	bl cursor_home
-	bl cursor_hide
+
 	mov lr, r4
 	bx lr
 
+=======
+>>>>>>> 6c512690a3d60aa1147e42b975c497cc9d9c3a21
+
 .global _start
 _start:
-	mov r9, #20  @ posY - init
-	mov r10, #30  @ posX - init
+	mov r9, #20  @ posY
+	mov r10, #30  @ posX
 
+<<<<<<< HEAD
 	bl gameLoop
-
+=======
+	bl clear_screen
+	bl cursor_home
+	bl cursor_hide
+>>>>>>> 6c512690a3d60aa1147e42b975c497cc9d9c3a21
 	bl term_init
 
 	bl draw_game
-
+	
 	sub sp, sp, #1
 
 while_loop:
@@ -85,68 +95,34 @@ while_loop:
 	beq subLeft
 
 	cmp r0, #119       @ w
-	beq subDown
-
-	cmp r0, #115       @ s
-	beq addUp
-
-	cmp r0, #100       @ d
-	beq addRight
-
-continue_while_loop:
-	bl cursor_home
-	bl clear_screen
-	bl draw_game
-	bl draw_spider
-
-	cmp r0, #27
-	bne while_loop
-
-skip_print:
-	ldrb r0, [sp]
-
 	cmp r0, #27 // Escape Key / Alt Key
 	bne while_loop // Go back if
 
 	add sp, sp, #1
 	bl term_quit
-
+	
 	bl cursor_show  // need to re-show the cursor
-
+	
 	mov r7, #EXIT
 	svc #0
 
-@*** Added this code below Xavier ***@
 addUp:
-	cmp r9, #20	@ Added this to make guy not go past the floor
-	addlt r9, r9, #1
+	add r9, r9, #1
 	b continue_while_loop
 subLeft:
-	cmp r10, #1		@ Added this code to not make guy go past left wall
-	subgt r10, r10, #1
+	sub r10, r10, #1
 	b continue_while_loop
 addRight:
-	cmp r10, #60		@ Added this code to not make guy go past Right Wall
-	addlt r10, r10, #1
+	add r10, r10, #1
 	b continue_while_loop
 subDown:
-	cmp r9, #1		@ Added this code to stop guy from going to high
-	subgt r9, r9, #1
+	sub r9, r9, #1
 	b continue_while_loop
 
 displaymessage:
 	mov r0, #STDOUT
 	mov32 r1, message
 	mov r2, #7
-	mov r7, #WRITE
-	svc #0
-
-	bx lr
-
-draw_spider:
-	mov r0, #STDOUT
-	mov32 r1, spider
-	mov r2, #spider_Len
 	mov r7, #WRITE
 	svc #0
 
