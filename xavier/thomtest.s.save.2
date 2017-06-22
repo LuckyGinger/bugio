@@ -13,13 +13,11 @@
 playerBody:
 	.asciz "#"
 	.set body_len, .-playerBody
-array_line:
-	.ascii "|                                                    |\0"
-	.set array_Len, .-array_line
-//array_line2:
-//	.ascii "                                                    |\0"
+space:
+	.ascii " "
+
 message:
-	.asciz "hit 40\n"
+	.asciz "hit 40"
 gameKey:
 	.skip 4
 posX:
@@ -32,8 +30,13 @@ player:
 	.skip 1
 	.set lenY, .-lenX-player
 
-.balign 4
-.text
+	.balign 4
+	.text
+
+//drawGame:
+//	mov r0, #MIN
+
+
 drawPlayer:
 	mov r3, lr
 
@@ -43,34 +46,46 @@ drawPlayer:
 	mov r7, #WRITE
 	svc #0
 
+	mov lr, r3
 	bx lr
 
-player_location:
-	mov r0, #STDOUT
-	mov32 r1, array_line
-	mov r2, #array_Len
-	sub r2, r2, r9
-	mov r7, #WRITE
-	svc #0
+startUp_position:
 
-	bx lr
+
+
 gameLoop:
 	mov r4, lr
 
 	bl cursor_hide
 	bl clear_screen
 	bl cursor_home
-	bl player_location
-	//bl locate
+	bl startUp_position
+	bl locate
 	bl drawPlayer
+/*.L1:
+	bl clear_screen
+        bl cursor_home
+	bl drawPlayer
+	b .L0
 
+
+.L0:
+        mov r0, #STDIN
+	mov r1, r6
+	mov r2, #4096
+	mov r7, #READ
+	svc #0
+*/
 	mov lr, r4
 	bx lr
+
 
 .global _start
 _start:
 	mov r9, #30  @ posX
 	mov r10, #20  @ posY
+
+	//bl initial_startUp
 
 	bl gameLoop
 	bl term_init
@@ -84,8 +99,6 @@ while_loop:
 	mov r1, sp
 	mov r2, #1
 	svc #0
-
-//	bl gameLoop
 
 	// If nothing was read, don't bother writing
 	cmp r0, #0
@@ -113,21 +126,17 @@ skip_print:
 
 isWASD:
 	cmp r0, #119     @ w
-	beq addUp
-	//addeq r10, r10, #1
+	addeq r10, r10, #1
 
 	cmp r0, #97      @ a
-	beq subLeft
-	//subeq r9, r9, #1
+	subeq r9, r9, #1
 
 	cmp r0, #155     @ s
-	b subDown
-	//subeq r10, r10, #1
+	subeq r10, r10, #1
 
 	cmp r0, #100     @ d
-	beq addRight
-	//addeq r9, r9, #1
-continue_isWASD:
+	addeq r9, r9, #1
+
 	cmp r9, #40
 	bleq displaymessage
 
@@ -136,48 +145,29 @@ continue_isWASD:
 
 	bx lr
 
-subLeft:
-	sub r10, r10, #1
-	b continue_isWASD
-addRight:
-	add r10, r10, #1
-	b continue_isWASD
-addUp:
-	add r9, r9, #1
-	b continue_isWASD
-subDown:
-	sub r9, r9, #1
-	b continue_isWASD
+//	b display_guy
+
+	mov r0, r1
+
+	cmp r0, #27
+
+	bne while_loop
+
+	add sp, sp, #1
+	bl term_quit
+
+	mov r7, #1
+	svc #0
 
 displaymessage:
 	mov r0, #STDOUT
 	mov32 r1, message
-	mov r2, #7
+	mov r2, #6
 	mov r7, #WRITE
 	svc #0
 
 	bx lr
-
-
-
-@***** All code below here is currently not being used *****@
-@
-@//	b display_guy
-/*
-@	mov r0, r1
-@
-@	cmp r0, #27
-@
-@	bne while_loop
-@
-@	add sp, sp, #1
-@	bl term_quit
-@
-@	mov r7, #1
-@	svc #0
-*/
-
-/*
+	
 increment_Xcounter:
 
 decrement_Xcounter:
@@ -225,4 +215,3 @@ test_non_zero:
 
 	add sp, sp, #4
 	bx lr
-*/
