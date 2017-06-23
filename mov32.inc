@@ -7,3 +7,14 @@
 	movt	\reg, #:upper16:\val
 
 .endm
+
+
+.macro mov_L_cur, left, down
+
+	.byte 27
+	.ascii "[\left()D"
+	.byte 27
+	.ascii "[\down()B"
+	
+
+.endm 
