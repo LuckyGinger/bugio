@@ -16,7 +16,7 @@ playerBody:
 space:
 	.ascii " "
 spider:
-	.ascii "  / _ \\n\_\(_)/_/\n_/\/o\\_\n/   \\0"
+	.ascii "  / _ \\\n\\_\\(_)\/_/\n _\/\/o\\\\_\n  \/   \\\0"
 	.set spider_Len, .-spider
 message:
 	.asciz "hit 40"
