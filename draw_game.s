@@ -23,6 +23,9 @@ bugio:
 side_wall:
 	.asciz "|"
 	.set wall_len, .-side_wall
+/*spider:
+	.ascii "  / _ \\\n\\_\\(_)\/_/\n _\/\/o\\\\_\n  \/   \\\0"
+        .set spider_Len, .-spider*/
 
 .text
 .global draw_game
@@ -63,6 +66,10 @@ draw_leftWall:
         mov r2, #wall_len
         mov r7, #WRITE
         svc #0
+
+	// THIS IS A TEST for spider powers
+	//cmp r12, #5
+	//beq draw_spider
 
 	@ If this the same row as Bugio
 	cmp r12, r9

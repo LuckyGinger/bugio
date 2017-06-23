@@ -16,7 +16,7 @@ playerBody:
 space:
 	.ascii " "
 spider:
-	.ascii "  / _ \\\n\\_\\(_)\/_/\n _\/\/o\\\\_\n  \/   \\\0"
+	.ascii "  / _ \\\n\\_\(_)\/_/\n _/ /o\\_\0"
 	.set spider_Len, .-spider
 message:
 	.asciz "hit 40"
@@ -142,7 +142,7 @@ displaymessage:
 	svc #0
 
 	bx lr
-.global draw_spider
+
 draw_spider:
 	mov r0, #STDOUT
 	mov32 r1, spider
