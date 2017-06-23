@@ -95,7 +95,6 @@ while_loop:
 
 continue_while_loop:
 	bl cursor_home
-	bl clear_screen
 	bl draw_game
 	bl draw_spider
 
