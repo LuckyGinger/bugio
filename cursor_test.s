@@ -19,31 +19,33 @@ position_left:
 	.byte 27
 	.ascii "[1D"
 test:
-        .ascii "  / _ \\    "
-
+        .ascii "  / _ \\"
         .byte 27
         .ascii "[1B"
         .byte 27
-        .ascii "[12D"
+        .ascii "[7D"
 
         //.set spider_Len1, .-spider
         .ascii "\\_\\(_)\/_/"
         .byte 27
         .ascii "[1B"
         .byte 27
-        .ascii "[12D"
+        .ascii "[9D"
+
 	//.set spider_Len2, .-spider-spider_Len1
         .ascii " _\/\/o\\\\_"
         .byte 27
         .ascii "[1B"
         .byte 27
-        .ascii "[12D"
+        .ascii "[8D"
+
         //.set spider_Len3, .-spider-spider_Len2
         .ascii "  \/   \\   "
         .byte 27
         .ascii "[1B"
         .byte 27
-        .ascii "[12D"
+        .ascii "[10D"
+
        	//.set spider_Len4, .-spider-spider_Len3
 	.set spider_Len, .-test
 
@@ -62,17 +64,30 @@ _start:
        // ldr r12, =locate
        // mov r7, #10
 
+//	push {r0, r1}
 	mov r0, #10
 	mov r1, #10
-
 	bl locate
-
+//	pop {r0, r1}
+	
+	
 	// Draw spider Here
         mov r0, #STDOUT
         mov32 r1, test
         mov r2, #spider_Len
         mov r7, #WRITE
         svc #0
+
+	mov r0, #10
+	mov r1, #10
+	bl locate
+
+        mov r0, #STDOUT
+	mov32 r1, test
+	mov r2, #spider_Len
+	mov r7, #WRITE
+	svc #0
+	
 
 	mov r7, #1
 	svc #0

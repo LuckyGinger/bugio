@@ -12,9 +12,9 @@
 .macro mov_L_cur, left, down
 
 	.byte 27
-	.ascii "[\left()D"
+	.ascii "[\left()D\0"
 	.byte 27
-	.ascii "[\down()B"
+	.ascii "[\down()B\0"
 	
 
 .endm 
