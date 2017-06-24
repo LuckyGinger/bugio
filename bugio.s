@@ -1,6 +1,7 @@
 @ Start writing code
 .include "mov32.inc"
 .include "system_calls.s"
+//.include "spider.s"
 
 @constant min bound
 .set MIN, 0
@@ -15,9 +16,9 @@ playerBody:
 	.set body_len, .-playerBody
 space:
 	.ascii " "
-spider:
-	.ascii "  / _ \\\n\\_\\(_)\/_/\n _\/\/o\\\\_\n  \/   \\\0"
-	.set spider_Len, .-spider
+//spider:
+//	.ascii "  / _ \\\n\\_\\(_)\/_/\n _\/\/o\\\\_\n  \/   \\\0"
+//	.set spider_Len, .-spider
 message:
 	.asciz "hit 40"
 gameKey:
@@ -32,6 +33,39 @@ player:
 	.skip 1
 	.set lenY, .-lenX-player
 
+spider:
+	.ascii "  / _ \\"
+	.byte 27
+	.ascii "[1B"
+	.byte 27
+	.ascii "[7D"
+
+	//.set spider_Len1, .-spider
+	.ascii "\\_\\(_)\/_/"
+	.byte 27
+	.ascii "[1B"
+	.byte 27
+	.ascii "[9D"
+
+	//.set spider_Len2, .-spider-spider_Len1
+	.ascii " _\/\/o\\\\_"
+	.byte 27
+	.ascii "[1B"
+	.byte 27
+	.ascii "[8D"
+
+	//.set spider_Len3, .-spider-spider_Len2
+	.ascii "  \/   \\   "
+	.byte 27
+	.ascii "[1B"
+	.byte 27
+	.ascii "[10D"
+
+	//.set spider_Len4, .-spider-spider_Len3
+	.set spider_Len, .-spider
+	
+
+	
 .balign 4
 .text
 drawPlayer:
@@ -54,6 +88,24 @@ gameLoop:
 	mov lr, r4
 	bx lr
 
+.global draw_spider
+draw_spider:
+	mov r4, lr
+	mov r0, #2  @ y pos
+	mov r1, #27  @ x pos
+
+	bl locate
+
+	mov r0, #STDOUT
+	mov32 r1, spider
+	mov r2, #spider_Len
+	mov r7, #WRITE
+	svc #0
+
+	mov lr, r4
+	bx lr
+
+	
 .global _start
 _start:
 	mov r9, #20  @ posY - init
@@ -65,6 +117,8 @@ _start:
 
 	bl draw_game
 
+	bl draw_spider
+	
 	sub sp, sp, #1
 
 while_loop:
@@ -96,8 +150,9 @@ while_loop:
 continue_while_loop:
 	bl cursor_home
 	bl draw_game
-	bl draw_spider
 
+	bl draw_spider
+	
 	cmp r0, #27
 	bne while_loop
 
@@ -137,15 +192,6 @@ displaymessage:
 	mov r0, #STDOUT
 	mov32 r1, message
 	mov r2, #7
-	mov r7, #WRITE
-	svc #0
-
-	bx lr
-.global draw_spider
-draw_spider:
-	mov r0, #STDOUT
-	mov32 r1, spider
-	mov r2, #spider_Len
 	mov r7, #WRITE
 	svc #0
 
