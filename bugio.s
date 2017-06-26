@@ -16,9 +16,6 @@ playerBody:
 	.set body_len, .-playerBody
 space:
 	.ascii " "
-//spider:
-//	.ascii "  / _ \\\n\\_\\(_)\/_/\n _\/\/o\\\\_\n  \/   \\\0"
-//	.set spider_Len, .-spider
 message:
 	.asciz "hit 40"
 gameKey:
@@ -47,7 +44,6 @@ spider:
 	.ascii "[1B"
 	.byte 27
 	.ascii "[7D"
-
 	//.set spider_Len1, .-spider
 	.ascii "\\_\\(_)\/_/"
 	.byte 27
@@ -71,14 +67,10 @@ spider:
 	.byte 27
 	.ascii "[3C"
 	.ascii "\\"
-	//.byte 27
-	//.ascii "[1B"
-	//.byte 27
-	//.ascii "[10D"
 
 	//.set spider_Len4, .-spider-spider_Len3
 	.set spider_Len, .-spider
-	
+
 
 	
 .balign 4
@@ -130,7 +122,6 @@ reset_cursor:
 
 	mov lr, r4
 	bx lr
-	
 	
 .global _start
 _start:
