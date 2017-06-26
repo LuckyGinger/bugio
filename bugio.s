@@ -71,7 +71,9 @@ spider:
 	//.set spider_Len4, .-spider-spider_Len3
 	.set spider_Len, .-spider
 
-
+bullet:
+	.ascii "*"
+	.set bullet_Len, .-bullet
 	
 .balign 4
 .text
@@ -111,6 +113,29 @@ draw_spider:
 
 	mov lr, r4
 	bx lr
+
+draw_bullet:	
+
+	//mov r4, lr
+	
+	mov r0, r9      @ y pos
+	//sub r0, r0, #1
+	
+	mov r1, r10     @ x pos
+	add r1, r1, #1
+	
+	bl locate
+
+	mov r0, #STDOUT
+	mov32 r1, bullet
+	mov r2, #bullet_Len
+	mov r7, #WRITE
+	svc #0
+
+	//mov lr, r4
+	
+	//bx lr
+	b continue_while_loop
 	
 .global reset_cursor
 reset_cursor:
@@ -135,6 +160,8 @@ _start:
 	bl draw_game
 
 	bl draw_spider
+
+//	bl draw_bullet
 	
 	sub sp, sp, #1
 
@@ -163,10 +190,15 @@ while_loop:
 
 	cmp r0, #100       @ d
 	beq addRight
-
+	
+	cmp r0, #32        @ space
+	beq draw_bullet
+	
+	
 continue_while_loop:
 	bl cursor_home
 	bl draw_game
+//	bl draw_bullet
 
 	bl draw_spider
 	
