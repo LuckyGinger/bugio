@@ -114,28 +114,42 @@ draw_spider:
 	mov lr, r4
 	bx lr
 
-draw_bullet:	
-
-	//mov r4, lr
-	
+init_bullet:
+	mov r6, #1      @ isLive bullet
 	mov r0, r9      @ y pos
-	//sub r0, r0, #1
-	
 	mov r1, r10     @ x pos
+	
+	push {r0, r1}
+
+	b continue_while_loop
+	
+
+draw_bullet:
+
+	mov r4, lr
+	
+	cmp r6, #0
+	bxeq lr
+
+	pop {r0, r1}
+	
 	add r1, r1, #1
 	
 	bl locate
 
+	push {r0, r1}
 	mov r0, #STDOUT
 	mov32 r1, bullet
 	mov r2, #bullet_Len
 	mov r7, #WRITE
 	svc #0
+	pop {r0, r1}
 
-	//mov lr, r4
+	push {r0, r1}
 	
-	//bx lr
-	b continue_while_loop
+	mov lr, r4
+	bx lr
+//	b continue_while_loop
 	
 .global reset_cursor
 reset_cursor:
@@ -161,7 +175,9 @@ _start:
 
 	bl draw_spider
 
-//	bl draw_bullet
+	mov r0, #0
+	mov r1, #0
+	push {r0, r1}
 	
 	sub sp, sp, #1
 
@@ -192,14 +208,19 @@ while_loop:
 	beq addRight
 	
 	cmp r0, #32        @ space
-	beq draw_bullet
+	beq init_bullet
+	//	moveq r6, #1
+	//beq draw_bullet
 	
 	
 continue_while_loop:
 	bl cursor_home
 	bl draw_game
-//	bl draw_bullet
 
+//	pop {r0, r1}
+	bl draw_bullet
+//	push {r0, r1}
+	
 	bl draw_spider
 	
 	cmp r0, #27
