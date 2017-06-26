@@ -34,7 +34,15 @@ player:
 	.set lenY, .-lenX-player
 
 spider:
-	.ascii "  / _ \\"
+	.byte 27
+	.ascii "[2C"
+	.ascii "/"
+	.byte 27
+	.ascii "[1C"
+	.ascii "_"
+	.byte 27
+	.ascii "[1C"
+	.ascii "\\"
 	.byte 27
 	.ascii "[1B"
 	.byte 27
@@ -47,19 +55,26 @@ spider:
 	.byte 27
 	.ascii "[9D"
 
+	.byte 27
+	.ascii "[1C"
 	//.set spider_Len2, .-spider-spider_Len1
-	.ascii " _\/\/o\\\\_"
+	.ascii "_\/\/o\\\\_"
 	.byte 27
 	.ascii "[1B"
 	.byte 27
 	.ascii "[8D"
 
+	.byte 27
+	.ascii "[2C"
 	//.set spider_Len3, .-spider-spider_Len2
-	.ascii "  \/   \\   "
+	.ascii "\/"
 	.byte 27
-	.ascii "[1B"
-	.byte 27
-	.ascii "[10D"
+	.ascii "[3C"
+	.ascii "\\"
+	//.byte 27
+	//.ascii "[1B"
+	//.byte 27
+	//.ascii "[10D"
 
 	//.set spider_Len4, .-spider-spider_Len3
 	.set spider_Len, .-spider
@@ -104,7 +119,18 @@ draw_spider:
 
 	mov lr, r4
 	bx lr
+	
+.global reset_cursor
+reset_cursor:
+	mov r4, lr
+	mov r0, #23 @ y pos
+	mov r1, #0  @ x pos
 
+	bl locate
+
+	mov lr, r4
+	bx lr
+	
 	
 .global _start
 _start:
@@ -167,6 +193,8 @@ skip_print:
 
 	bl cursor_show  // need to re-show the cursor
 
+	bl reset_cursor
+	
 	mov r7, #EXIT
 	svc #0
 
