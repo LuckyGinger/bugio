@@ -118,26 +118,32 @@ init_bullet:
 	mov r6, #1      @ isLive bullet
 	mov r0, r9      @ y pos
 	mov r1, r10     @ x pos
-	
+
 	push {r0, r1}
 
 	b continue_while_loop
-	
 
 draw_bullet:
-
 	mov r4, lr
-	
+
 	cmp r6, #0
 	bxeq lr
 
 	pop {r0, r1}
-	
+	// Adding two mov commands becuase I need to make a copy of the values
+	//mov r2, r0
+	//mov r7, r1
+	//push {r2, r7} // Pushing these as a copy of values
 	add r1, r1, #1
-	
+
 	bl locate
 
-	push {r0, r1}
+	@ This push r0 and r1 (below us) is not pushing the r0 and r1 they are changing
+	@ Becuase of the locate  line above.
+	//pop {r2, r7}@    |
+	//mov r0, r2  @    |
+	//mov r1, r7  @    |
+	push {r0, r1} @<----
 	mov r0, #STDOUT
 	mov32 r1, bullet
 	mov r2, #bullet_Len
@@ -146,11 +152,11 @@ draw_bullet:
 	pop {r0, r1}
 
 	push {r0, r1}
-	
+
 	mov lr, r4
 	bx lr
 //	b continue_while_loop
-	
+
 .global reset_cursor
 reset_cursor:
 	mov r4, lr
@@ -175,8 +181,8 @@ _start:
 
 	bl draw_spider
 
-	mov r0, #0
-	mov r1, #0
+	mov r0, #4
+	mov r1, #7
 	push {r0, r1}
 	
 	sub sp, sp, #1
