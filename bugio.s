@@ -134,13 +134,8 @@ draw_bullet:
 	add r1, r1, #1
 	mov r5, r0
 	mov r7, r1
-	//push {r2, r7} // Pushing these as a copy of values
-	//add r5, r5, #1
 
-	bl locate
-
-	@ This push r0 and r1 (below us) is not pushing the r0 and r1 they are changing
-	@ Becuase of the locate  line above.
+	bl locate @ This locate is erasing the r0 and r1
 
 	mov r0, r5  @      |
 	mov r1, r7  @      |
@@ -186,7 +181,7 @@ _start:
 	mov r0, #4
 	mov r1, #7
 	push {r0, r1}
-	
+
 	sub sp, sp, #1
 
 while_loop:
@@ -196,6 +191,10 @@ while_loop:
 	mov r1, sp
 	mov r2, #1
 	svc #0
+
+	@Testing something here ignore for now
+@	cmp r6, #1
+@	bleq live_bullets_move
 
 	// If nothing was read, don't bother writing
 	cmp r0, #0
@@ -214,13 +213,12 @@ while_loop:
 
 	cmp r0, #100       @ d
 	beq addRight
-	
+
 	cmp r0, #32        @ space
 	beq init_bullet
 	//	moveq r6, #1
 	//beq draw_bullet
-	
-	
+
 continue_while_loop:
 	bl cursor_home
 	bl draw_game
@@ -250,7 +248,6 @@ skip_print:
 	mov r7, #EXIT
 	svc #0
 
-@*** Added this code below Xavier ***@
 addUp:
 	cmp r9, #20	@ Added this to make guy not go past the floor
 	addlt r9, r9, #1
@@ -277,3 +274,29 @@ displaymessage:
 
 	bx lr
 
+/*live_bullets_move:
+	pop {r0, r1}
+	push {r4, lr}
+	add r0, r0, #1
+	add r1, r1, #1
+	mov r5, r0
+	mov r7, r1
+
+	bl locate
+
+	mov r0, r5
+	mov r1, r7
+	//push {r0, r1}
+
+        mov r0, #STDOUT
+        mov32 r1, bullet
+        mov r2, #bullet_Len
+        mov r7, #WRITE
+        svc #0
+
+
+
+	pop {r4, lr}
+	push {r0, r1}
+	bx lr
+*/
