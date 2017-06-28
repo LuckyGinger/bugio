@@ -131,19 +131,21 @@ draw_bullet:
 
 	pop {r0, r1}
 	// Adding two mov commands becuase I need to make a copy of the values
-	//mov r2, r0
-	//mov r7, r1
-	//push {r2, r7} // Pushing these as a copy of values
 	add r1, r1, #1
+	mov r5, r0
+	mov r7, r1
+	//push {r2, r7} // Pushing these as a copy of values
+	//add r5, r5, #1
 
 	bl locate
 
 	@ This push r0 and r1 (below us) is not pushing the r0 and r1 they are changing
 	@ Becuase of the locate  line above.
-	//pop {r2, r7}@    |
-	//mov r0, r2  @    |
-	//mov r1, r7  @    |
+
+	mov r0, r5  @      |
+	mov r1, r7  @      |
 	push {r0, r1} @<----
+
 	mov r0, #STDOUT
 	mov32 r1, bullet
 	mov r2, #bullet_Len
