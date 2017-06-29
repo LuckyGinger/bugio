@@ -45,6 +45,10 @@ reset:
 	.byte 27
 	.ascii "[0m"
 
+color_red:
+        .byte 27
+        .ascii "[31m\0"
+        .set color_Len, .-color_red
 
 .balign 4
 .text
@@ -81,6 +85,25 @@ fore_color:
 	mov r2, #5
 	svc #0
 	bx lr
+
+.global spider_color
+spider_color:
+	push {r0, r1}
+        cmp r0, #10
+        bxpl lr
+
+        // Inject the color number into the string
+        add r0, r0, #48
+        ldr r1, =color_red
+        strb r0, [r1, #3]
+
+        mov r7, #WRITE
+        mov r0, #STDOUT
+        mov r2, #5
+        svc #0
+
+	pop {r0, r1}
+        bx lr
 
 .global back_color
 back_color:

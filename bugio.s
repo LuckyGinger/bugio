@@ -20,16 +20,11 @@ message:
 	.asciz "hit 40"
 gameKey:
 	.skip 4
-posX:
-	.word 30
-posY:
-	.word 20
 player:
 	.skip 1
 	.set lenX, .-player
 	.skip 1
 	.set lenY, .-lenX-player
-
 spider:
 	.byte 27
 	.ascii "[2C"
@@ -50,7 +45,6 @@ spider:
 	.ascii "[1B"
 	.byte 27
 	.ascii "[9D"
-
 	.byte 27
 	.ascii "[1C"
 	//.set spider_Len2, .-spider-spider_Len1
@@ -59,7 +53,6 @@ spider:
 	.ascii "[1B"
 	.byte 27
 	.ascii "[8D"
-
 	.byte 27
 	.ascii "[2C"
 	//.set spider_Len3, .-spider-spider_Len2
@@ -67,7 +60,6 @@ spider:
 	.byte 27
 	.ascii "[3C"
 	.ascii "\\"
-
 	//.set spider_Len4, .-spider-spider_Len3
 	.set spider_Len, .-spider
 
@@ -103,7 +95,9 @@ draw_spider:
 	mov r0, #2  @ y pos
 	mov r1, #27  @ x pos
 
+	bl spider_color
 	bl locate
+	bl back_color
 
 	mov r0, #STDOUT
 	mov32 r1, spider
