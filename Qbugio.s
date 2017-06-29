@@ -1,7 +1,6 @@
 @ Start writing code
 .include "mov32.inc"
 .include "system_calls.s"
-//.include "spider.s"
 
 @constant min bound
 .set MIN, 0
@@ -75,20 +74,19 @@ bullet:
 	.ascii "*"
 	.set bullet_Len, .-bullet
 
-.balign 4
-.text
-drawPlayer:
-	mov r3, lr
-	mov r0, #STDOUT
-	mov32 r1, playerBody
-	mov r2, #body_len
-	mov r7, #WRITE
-	svc #0
+//.balign 4
+//.text
+//drawPlayer:
+@	mov r3, lr
+@	mov r0, #STDOUT
+@	mov32 r1, playerBody
+@	mov r2, #body_len
+@	mov r7, #WRITE
+@	svc #0
+@
+@	mov lr, r3
+@	bx lr
 
-	mov lr, r3
-	bx lr
-
-.global gameLoop
 gameLoop:
 	mov r4, lr
 	bl clear_screen
@@ -97,7 +95,6 @@ gameLoop:
 	mov lr, r4
 	bx lr
 
-.global draw_spider
 draw_spider:
 	mov r4, lr
 	mov r0, #2  @ y pos
@@ -116,12 +113,12 @@ draw_spider:
 
 init_bullet:
 	mov r6, #1      @ isLive bullet
-	mov r0, r9      @ x pos
-	mov r1, r10     @ y pos
-
-	add r1, #1
+	mov r0, r9      @ y pos
+	mov r1, r10     @ x pos
+	add r1, r1, #1
 
 	push {r0, r1}
+//	mov r6, #0
 
 	b continue_while_loop
 
@@ -131,19 +128,17 @@ draw_bullet:
 	cmp r6, #0
 	bxeq lr
 
-	cmp r5, #5 @move to before subtracting
-	bxne lr
-
-	mov r5, #0
-
 	pop {r0, r1}
-	sub r0, r0, #1
+	// Adding two mov commands becuase I need to make a copy of the values
+	cmp r5, #100
+	subeq r0, r0, #1
+	moveq r5, #0
 
 	cmp r0, #1
 	movle r6, #0
 
 	push {r0, r1}
-	bl locate
+	bl locate @ This locate is erasing the r0 and r1
 
 	mov r0, #STDOUT
 	mov32 r1, bullet
@@ -164,13 +159,13 @@ reset_cursor:
 
 	mov lr, r4
 	bx lr
-	
+
 .global _start
 _start:
 	mov r9, #20   @ posY - init
 	mov r10, #30  @ posX - init
+	mov r5, #0    @ Program Counter
 
-	mov r5, #0    @ Game Counter
 
 	bl gameLoop
 
@@ -180,21 +175,22 @@ _start:
 
 	bl draw_spider
 
-	mov r0, #4
-	mov r1, #7
-	push {r0, r1}
+	//mov r0, #4
+	//mov r1, #7
+	//push {r0, r1}
 
 	sub sp, sp, #1
 
 while_loop:
+	// add to the counter
+	add r5, r5, #1
+
 	// get movement from user
 	mov r7, #READ
 	mov r0, #STDIN
 	mov r1, sp
 	mov r2, #1
 	svc #0
-
-	add r5, #1
 
 	@Testing something here ignore for now
 	cmp r6, #1
@@ -227,7 +223,6 @@ continue_while_loop:
 	bl cursor_home
 	bl draw_game
 
-	bl draw_bullet
 
 	bl draw_spider
 
@@ -246,7 +241,7 @@ skip_print:
 	bl cursor_show  // need to re-show the cursor
 
 	bl reset_cursor
-	
+
 	mov r7, #EXIT
 	svc #0
 
@@ -275,30 +270,3 @@ displaymessage:
 	svc #0
 
 	bx lr
-
-/*live_bullets_move:
-	pop {r0, r1}
-	push {r4, lr}
-	add r0, r0, #1
-	add r1, r1, #1
-	mov r5, r0
-	mov r7, r1
-
-	bl locate
-
-	mov r0, r5
-	mov r1, r7
-	//push {r0, r1}
-
-        mov r0, #STDOUT
-        mov32 r1, bullet
-        mov r2, #bullet_Len
-        mov r7, #WRITE
-        svc #0
-
-
-
-	pop {r4, lr}
-	push {r0, r1}
-	bx lr
-*/
