@@ -47,8 +47,7 @@ reset:
 
 color_red:
         .byte 27
-        .ascii "[31m\0"
-        .set color_Len, .-color_red
+        .ascii "[34m"
 
 .balign 4
 .text
@@ -137,7 +136,7 @@ locate:
 	cmp r1, #1000
 	bxpl lr
 
-	push {r4-r7, lr}
+	push {r4-r8, lr} // Uneven Stack without r8
 	ldr r12, =position
 	mov r7, #10
 
@@ -173,7 +172,7 @@ coordinate_loop:
 	mov r2, #12
 	svc #0
 
-	pop {r4-r7, pc}
+	pop {r4-r8, pc}
 
 
 .global clear_line

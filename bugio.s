@@ -95,15 +95,18 @@ draw_spider:
 	mov r0, #2  @ y pos
 	mov r1, #27  @ x pos
 
+	mov r0, #5
 	bl spider_color
 	bl locate
-	bl back_color
 
 	mov r0, #STDOUT
 	mov32 r1, spider
 	mov r2, #spider_Len
 	mov r7, #WRITE
 	svc #0
+
+	mov r0, #9
+	bl fore_color
 
 	mov lr, r4
 	bx lr
