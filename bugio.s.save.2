@@ -92,12 +92,12 @@ gameLoop:
 .global draw_spider
 draw_spider:
 	mov r4, lr
-	mov r0, #5   @ For color code text
+	mov r0, #2  @ y pos
 	mov r1, #27  @ x pos
 
 	bl spider_color
-	mov r0, #2
 	bl locate
+	bl back_color
 
 	mov r0, #STDOUT
 	mov32 r1, spider
@@ -105,35 +105,41 @@ draw_spider:
 	mov r7, #WRITE
 	svc #0
 
-	mov r0, #9
-	bl fore_color
-
 	mov lr, r4
 	bx lr
 
 init_bullet:
 	mov r6, #1      @ isLive bullet
 	mov r0, r9      @ y pos
-	mov r1, r10	@ x pos
+	mov r1, r10
 	add r1, r1, #1
+//     @ x pos
 
-	push {r0, r1, r6, r7}
+	push {r0, r1}
+//	mov r6, #0
 
 	b continue_while_loop
 
 draw_bullet:
 	mov r4, lr
 
-	pop {r0, r1, r6, r7}
-//	cmp r7, #50
-//	addne r7, #1
-	subeq r0, r0, #1
-//	moveq r7, #0
-	cmp r0, #2
+	//cmp r6, #0
+	//bxeq lr
+
+	pop {r0, r1}
+	// Adding two mov commands becuase I need to make a copy of the values
+	sub r0, r0, #1
+	//mov r5, r0
+	//mov r7, r1
+
+	cmp r0, #1
 	movle r6, #0
 
-	push {r0, r1, r6, r7}
+	push {r0, r1}
 	bl locate @ This locate is erasing the r0 and r1
+
+	//mov r0, r5  @      |
+	//mov r1, r7  @      |
 
 	mov r0, #STDOUT
 	mov32 r1, bullet
@@ -167,6 +173,10 @@ _start:
 	bl draw_game
 
 	bl draw_spider
+
+	//mov r0, #4
+	//mov r1, #7
+	//push {r0, r1}
 
 	sub sp, sp, #1
 
@@ -202,10 +212,13 @@ while_loop:
 
 	cmp r0, #32        @ space
 	beq init_bullet
+	//	moveq r6, #1
+	//beq draw_bullet
 
 continue_while_loop:
 	bl cursor_home
 	bl draw_game
+
 
 	bl draw_spider
 
