@@ -74,21 +74,6 @@ bullet:
 	.ascii "*"
 	.set bullet_Len, .-bullet
 
-<<<<<<< HEAD
-//.balign 4
-//.text
-//drawPlayer:
-@	mov r3, lr
-@	mov r0, #STDOUT
-@	mov32 r1, playerBody
-@	mov r2, #body_len
-@	mov r7, #WRITE
-@	svc #0
-@
-@	mov lr, r3
-@	bx lr
-
-=======
 .balign 4
 .text
 drawPlayer:
@@ -219,11 +204,8 @@ while_loop:
 	mov r2, #1
 	svc #0
 
-<<<<<<< HEAD
-=======
 	add r5, #1
 
->>>>>>> Changed the color of the spider :) and edited cursor.s but only added a global label called color_red.
 	@Testing something here ignore for now
 	cmp r6, #1
 	bleq draw_bullet
@@ -255,10 +237,7 @@ continue_while_loop:
 	bl cursor_home
 	bl draw_game
 
-<<<<<<< HEAD
-=======
 	bl draw_bullet
->>>>>>> Changed the color of the spider :) and edited cursor.s but only added a global label called color_red.
 
 	bl draw_spider
 
@@ -277,11 +256,6 @@ skip_print:
 	bl cursor_show  // need to re-show the cursor
 
 	bl reset_cursor
-<<<<<<< HEAD
-
-=======
-	
->>>>>>> Changed the color of the spider :) and edited cursor.s but only added a global label called color_red.
 	mov r7, #EXIT
 	svc #0
 
@@ -310,8 +284,6 @@ displaymessage:
 	svc #0
 
 	bx lr
-<<<<<<< HEAD
-=======
 
 /*live_bullets_move:
 	pop {r0, r1}
@@ -339,4 +311,3 @@ displaymessage:
 	push {r0, r1}
 	bx lr
 */
->>>>>>> Changed the color of the spider :) and edited cursor.s but only added a global label called color_red.
