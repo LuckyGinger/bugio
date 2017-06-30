@@ -166,7 +166,6 @@ _start:
 	mov r10, #30  @ posX - init
 	mov r5, #0    @ Program Counter
 
-
 	bl gameLoop
 
 	bl term_init
