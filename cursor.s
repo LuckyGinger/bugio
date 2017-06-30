@@ -45,6 +45,9 @@ reset:
 	.byte 27
 	.ascii "[0m"
 
+color_red:
+        .byte 27
+        .ascii "[34m"
 
 .balign 4
 .text
@@ -82,6 +85,25 @@ fore_color:
 	svc #0
 	bx lr
 
+.global spider_color
+spider_color:
+	push {r0, r1}
+        cmp r0, #10
+        bxpl lr
+
+        // Inject the color number into the string
+        add r0, r0, #48
+        ldr r1, =color_red
+        strb r0, [r1, #3]
+
+        mov r7, #WRITE
+        mov r0, #STDOUT
+        mov r2, #5
+        svc #0
+
+	pop {r0, r1}
+        bx lr
+
 .global back_color
 back_color:
 	cmp r0, #10
@@ -114,7 +136,7 @@ locate:
 	cmp r1, #1000
 	bxpl lr
 
-	push {r4-r7, lr}
+	push {r4-r8, lr} // Uneven Stack without r8
 	ldr r12, =position
 	mov r7, #10
 
@@ -150,7 +172,7 @@ coordinate_loop:
 	mov r2, #12
 	svc #0
 
-	pop {r4-r7, pc}
+	pop {r4-r8, pc}
 
 
 .global clear_line
