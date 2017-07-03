@@ -205,7 +205,6 @@ while_loop:
 	// If nothing was read, don't bother writing
 	cmp r0, #0
 	beq skip_print
-	mov r0, #0
 	
 	ldrb r0, [sp]
 
