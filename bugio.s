@@ -1,4 +1,10 @@
 @ Start writing code
+        .set CLOCK_GETTIME, 0x107
+	.set CLOCK_REALTIME, 0
+	.set CLOCK_NANOSLEEP, 0x109
+	.set TIMER_ABSTIME, 1
+	
+
 .include "mov32.inc"
 .include "system_calls.s"
 //.include "spider.s"
@@ -66,7 +72,11 @@ spider:
 bullet:
 	.ascii "*"
 	.set bullet_Len, .-bullet
-
+timespec:
+	.word 1
+	.word 500000
+	
+	
 .balign 4
 .text
 drawPlayer:
@@ -124,6 +134,8 @@ init_bullet:
 draw_bullet:
 	mov r4, lr
 
+
+	
 	pop {r0, r1, r6, r7}
 //	cmp r7, #50
 //	addne r7, #1
@@ -135,10 +147,18 @@ draw_bullet:
 	push {r0, r1, r6, r7}
 	bl locate @ This locate is erasing the r0 and r1
 
+	
 	mov r0, #STDOUT
 	mov32 r1, bullet
 	mov r2, #bullet_Len
 	mov r7, #WRITE
+	svc #0
+
+	mov r0, #CLOCK_REALTIME
+	mov r1, #0
+	mov32 r2, timespec
+	mov r3, #0
+	movw r7, #CLOCK_NANOSLEEP
 	svc #0
 
 	mov lr, r4
@@ -185,7 +205,8 @@ while_loop:
 	// If nothing was read, don't bother writing
 	cmp r0, #0
 	beq skip_print
-
+	mov r0, #0
+	
 	ldrb r0, [sp]
 
 	cmp r0, #97        @ a

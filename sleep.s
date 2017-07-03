@@ -8,7 +8,7 @@
 	.data
 	.balign 4
 struct:
-	.word 2
+	.word 10
 	.word 5
 
 	.balign 4
