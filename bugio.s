@@ -73,8 +73,8 @@ bullet:
 	.ascii "*"
 	.set bullet_Len, .-bullet
 timespec:
-	.word 1
-	.word 500000
+	.word 0
+	.word 50000000
 	
 	
 .balign 4
