@@ -17,9 +17,6 @@ new_line:
 space:
 	.asciz "                                                            "
 	.set space_len, .-space
-bugio:
-	.asciz "#"
-	.set bugio_len, .-bugio
 side_wall:
 	.asciz "|"
 	.set wall_len, .-side_wall
@@ -34,7 +31,7 @@ draw_game:
 @	mov r9, #20     @ Test row for Bugio, This code should eventually be commented out
 @	mov r10, #30    @ Test Column for bugio, Eventually will be commented out
 	mov r11, #21    @ Screen Height
-	mov r12, #1    @ Counter to track row number
+	mov r12, #1     @ Counter to track row number
 
 draw_topBot:
 	@ Draws the top or bottom row of tildas
@@ -72,8 +69,8 @@ draw_leftWall:
 	//beq draw_spider
 
 	@ If this the same row as Bugio
-	cmp r12, r9
-	beq bugirow
+@	cmp r12, r9
+@	beq bugirow
 	@ Else keep going
 
 draw_space:
@@ -107,7 +104,8 @@ draw_frame:
 
 	b draw_leftWall
 
-bugirow:
+/*
+@bugirow:
 
 	@ Print spaces up to bugio
 	mov r0, #STDOUT
@@ -135,3 +133,4 @@ bugirow:
 	sub r10, r10, #1
 
 	b draw_frame
+*/
