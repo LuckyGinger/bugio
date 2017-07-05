@@ -1,6 +1,13 @@
 @ Start writing code
+        .set CLOCK_GETTIME, 0x107
+	.set CLOCK_REALTIME, 0
+	.set CLOCK_NANOSLEEP, 0x109
+	.set TIMER_ABSTIME, 1
+	
+
 .include "mov32.inc"
 .include "system_calls.s"
+//.include "spider.s"
 
 @constant min bound
 .set MIN, 0
@@ -19,16 +26,11 @@ message:
 	.asciz "hit 40"
 gameKey:
 	.skip 4
-posX:
-	.word 30
-posY:
-	.word 20
 player:
 	.skip 1
 	.set lenX, .-player
 	.skip 1
 	.set lenY, .-lenX-player
-
 spider:
 	.byte 27
 	.ascii "[2C"
@@ -49,7 +51,6 @@ spider:
 	.ascii "[1B"
 	.byte 27
 	.ascii "[9D"
-
 	.byte 27
 	.ascii "[1C"
 	//.set spider_Len2, .-spider-spider_Len1
@@ -58,7 +59,6 @@ spider:
 	.ascii "[1B"
 	.byte 27
 	.ascii "[8D"
-
 	.byte 27
 	.ascii "[2C"
 	//.set spider_Len3, .-spider-spider_Len2
@@ -66,22 +66,16 @@ spider:
 	.byte 27
 	.ascii "[3C"
 	.ascii "\\"
-
 	//.set spider_Len4, .-spider-spider_Len3
 	.set spider_Len, .-spider
 
 bullet:
 	.ascii "*"
 	.set bullet_Len, .-bullet
+timespec:
+	.word 1
+	.word 1
 
-.balign 4
-.text
-drawPlayer:
-	mov r3, lr
-	mov r0, #STDOUT
-	mov32 r1, playerBody
-	mov r2, #body_len
-	mov r7, #WRITE
 
 .balign 4
 .text
@@ -108,9 +102,11 @@ gameLoop:
 .global draw_spider
 draw_spider:
 	mov r4, lr
-	mov r0, #2  @ y pos
+	mov r0, #5   @ For color code text
 	mov r1, #27  @ x pos
 
+	bl spider_color
+	mov r0, #2
 	bl locate
 
 	mov r0, #STDOUT
@@ -119,39 +115,38 @@ draw_spider:
 	mov r7, #WRITE
 	svc #0
 
+	mov r0, #9
+	bl fore_color
+
 	mov lr, r4
 	bx lr
 
 init_bullet:
 	mov r6, #1      @ isLive bullet
-	mov r0, r9      @ x pos
-	mov r1, r10     @ y pos
+	mov r0, r9      @ y pos
+	mov r1, r10	@ x pos
+	add r1, r1, #1
 
-	add r1, #1
-
-	push {r0, r1}
+	push {r0, r1, r6, r7}
 
 	b continue_while_loop
 
 draw_bullet:
 	mov r4, lr
 
-	cmp r6, #0
-	bxeq lr
 
-	cmp r5, #5 @move to before subtracting
-	bxne lr
 
-	mov r5, #0
-
-	pop {r0, r1}
-	sub r0, r0, #1
-
-	cmp r0, #1
+	pop {r0, r1, r6, r7}
+//	cmp r7, #50
+//	addne r7, #1
+	subeq r0, r0, #1
+//	moveq r7, #0
+	cmp r0, #2
 	movle r6, #0
 
-	push {r0, r1}
-	bl locate
+	push {r0, r1, r6, r7}
+	bl locate @ This locate is erasing the r0 and r1
+
 
 	mov r0, #STDOUT
 	mov32 r1, bullet
@@ -172,11 +167,11 @@ reset_cursor:
 
 	mov lr, r4
 	bx lr
+
 .global _start
 _start:
-	mov r9, #20   @ posY - init
+	mov r9, #20  @ posY - init
 	mov r10, #30  @ posX - init
-	mov r5, #0    @ Game Counter
 
 	bl gameLoop
 
@@ -186,25 +181,15 @@ _start:
 
 	bl draw_spider
 
-	mov r0, #4
-	mov r1, #7
-	push {r0, r1}
-
 	sub sp, sp, #1
 
 while_loop:
-	// add to the counter
-	add r5, r5, #1
-
 	// get movement from user
 	mov r7, #READ
 	mov r0, #STDIN
-
 	mov r1, sp
 	mov r2, #1
 	svc #0
-
-	add r5, #1
 
 	@Testing something here ignore for now
 	cmp r6, #1
@@ -213,7 +198,8 @@ while_loop:
 	// If nothing was read, don't bother writing
 	cmp r0, #0
 	beq skip_print
-
+	mov r0, #0
+	
 	ldrb r0, [sp]
 
 	cmp r0, #97        @ a
@@ -230,14 +216,17 @@ while_loop:
 
 	cmp r0, #32        @ space
 	beq init_bullet
-	//	moveq r6, #1
-	//beq draw_bullet
 
 continue_while_loop:
+	mov r0, #CLOCK_REALTIME
+	mov r1, #0
+	mov32 r2, timespec
+	mov r3, #0
+	movw r7, #CLOCK_NANOSLEEP
+	svc #0
+
 	bl cursor_home
 	bl draw_game
-
-	bl draw_bullet
 
 	bl draw_spider
 
@@ -256,6 +245,7 @@ skip_print:
 	bl cursor_show  // need to re-show the cursor
 
 	bl reset_cursor
+
 	mov r7, #EXIT
 	svc #0
 
@@ -284,30 +274,3 @@ displaymessage:
 	svc #0
 
 	bx lr
-
-/*live_bullets_move:
-	pop {r0, r1}
-	push {r4, lr}
-	add r0, r0, #1
-	add r1, r1, #1
-	mov r5, r0
-	mov r7, r1
-
-	bl locate
-
-	mov r0, r5
-	mov r1, r7
-	//push {r0, r1}
-
-        mov r0, #STDOUT
-        mov32 r1, bullet
-        mov r2, #bullet_Len
-        mov r7, #WRITE
-        svc #0
-
-
-
-	pop {r4, lr}
-	push {r0, r1}
-	bx lr
-*/
