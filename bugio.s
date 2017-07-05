@@ -166,7 +166,7 @@ clear_bullet:
 draw_bullet:
 	mov r4, lr
 
-	
+
 
 	pop {r0, r1, r6, r7}
 	bl clear_bullet
