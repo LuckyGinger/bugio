@@ -3,7 +3,7 @@
 	.set CLOCK_REALTIME, 0
 	.set CLOCK_NANOSLEEP, 0x109
 	.set TIMER_ABSTIME, 1
-	
+
 
 .include "mov32.inc"
 .include "system_calls.s"
@@ -78,8 +78,7 @@ bullet:
 timespec:
 	.word 0
 	.word 50000000
-	
-	
+
 .balign 4
 .text
 
@@ -90,7 +89,7 @@ draw_player:
 	mov r1, r10
 
 	bl locate
-	
+
 	mov r0, #STDOUT
 	mov32 r1, playerBody
 	mov r2, #body_len
@@ -135,7 +134,7 @@ init_bullet:
 	mov r6, #1      @ isLive bullet
 	mov r0, r9      @ y pos
 	mov r1, r10	@ x pos
-	add r1, r1, #1
+//	add r1, r1, #1
 
 	push {r0, r1, r6, r7}
 
@@ -145,19 +144,19 @@ draw_bullet:
 	mov r4, lr
 
 
-	
+
 	pop {r0, r1, r6, r7}
 //	cmp r7, #50
 //	addne r7, #1
-	subeq r0, r0, #1
+	sub r0, r0, #1
 //	moveq r7, #0
-	cmp r0, #2
+	cmp r0, #1
 	movle r6, #0
 
 	push {r0, r1, r6, r7}
 	bl locate @ This locate is erasing the r0 and r1
 
-	
+
 	mov r0, #STDOUT
 	mov32 r1, bullet
 	mov r2, #bullet_Len
