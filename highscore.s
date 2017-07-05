@@ -11,7 +11,8 @@
 .set O_WRONLY, 1
 .set O_CREAT, 64
 .set O_TRUNC, 512
-.set CREAT_FLAGS, (O_WRONLY | O_CREAT | O_TRUNC)
+.set O_APPEND, 1024
+.set CREAT_FLAGS, (O_WRONLY | O_APPEND | O_CREAT/* | O_TRUNC*/)
 
 
 .balign 4
