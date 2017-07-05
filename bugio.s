@@ -174,6 +174,8 @@ draw_bullet:
 
 	cmp r0, #2
 	movle r6, #0
+@	movle lr, r4
+@	bxle lr
 
 	push {r0, r1, r6, r7}
 	bl locate @ This locate is erasing the r0 and r1
