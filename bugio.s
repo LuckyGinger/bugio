@@ -134,23 +134,45 @@ init_bullet:
 	mov r6, #1      @ isLive bullet
 	mov r0, r9      @ y pos
 	mov r1, r10	@ x pos
-//	add r1, r1, #1
 
 	push {r0, r1, r6, r7}
 
 	b continue_while_loop
 
+clear_bullet:
+	mov r4, lr
+
+	push {r3, r4}
+	mov r3, r0
+	mov r4, r1
+
+	bl locate
+
+	mov r0, #STDOUT
+	mov32 r1, clearChar
+	mov r2, #clear_body_len
+	mov r7, #WRITE
+	svc #0
+	
+	mov r0, r3
+	mov r1, r4
+
+	pop {r3, r4}
+	
+	mov lr, r4
+	bx lr
+	
+	
 draw_bullet:
 	mov r4, lr
 
-
+	
 
 	pop {r0, r1, r6, r7}
-//	cmp r7, #50
-//	addne r7, #1
+	bl clear_bullet
 	sub r0, r0, #1
-//	moveq r7, #0
-	cmp r0, #1
+
+	cmp r0, #2
 	movle r6, #0
 
 	push {r0, r1, r6, r7}
