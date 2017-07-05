@@ -18,8 +18,11 @@
 .balign 4
 .data
 playerBody:
-	.asciz "#\n"
+	.asciz "#"
 	.set body_len, .-playerBody
+clearChar:
+	.asciz " "
+	.set clear_body_len, .-clearChar
 space:
 	.ascii " "
 message:
@@ -79,15 +82,22 @@ timespec:
 	
 .balign 4
 .text
-drawPlayer:
-	mov r3, lr
+
+draw_player:
+	mov r4, lr
+
+	mov r0, r9
+	mov r1, r10
+
+	bl locate
+	
 	mov r0, #STDOUT
 	mov32 r1, playerBody
 	mov r2, #body_len
 	mov r7, #WRITE
 	svc #0
 
-	mov lr, r3
+	mov lr, r4
 	bx lr
 
 .global gameLoop
@@ -177,8 +187,8 @@ reset_cursor:
 
 .global _start
 _start:
-	mov r9, #20  @ posY - init
-	mov r10, #30  @ posX - init
+	mov r9, #21  @ posY - init
+	mov r10, #31  @ posX - init
 
 	bl gameLoop
 
@@ -188,6 +198,8 @@ _start:
 
 	bl draw_spider
 
+	bl draw_player
+	
 	sub sp, sp, #1
 
 while_loop:
@@ -225,7 +237,7 @@ while_loop:
 
 continue_while_loop:
 	bl cursor_home
-	bl draw_game
+	bl draw_player
 
 	bl draw_spider
 
@@ -235,7 +247,7 @@ continue_while_loop:
 skip_print:
 	ldrb r0, [sp]
 
-	cmp r0, #27 // Escape Key / Alt Key
+	cmp r0, #27    // Escape Key / Alt Key
 	bne while_loop // Go back if
 
 	add sp, sp, #1
@@ -248,20 +260,42 @@ skip_print:
 	mov r7, #EXIT
 	svc #0
 
+clear_player:
+	mov r4, lr
+
+	mov r0, r9
+	mov r1, r10
+
+	bl locate
+
+	mov r0, #STDOUT
+	mov32 r1, clearChar
+	mov r2, #clear_body_len
+	mov r7, #WRITE
+	svc #0
+
+	mov lr, r4
+	bx lr
+	
+	
 addUp:
-	cmp r9, #20	@ Added this to make guy not go past the floor
+	bl clear_player
+	cmp r9, #21	        @ Added this to make guy not go past the floor
 	addlt r9, r9, #1
 	b continue_while_loop
 subLeft:
-	cmp r10, #1		@ Added this code to not make guy go past left wall
+	bl clear_player
+	cmp r10, #2		@ Added this code to not make guy go past left wall
 	subgt r10, r10, #1
 	b continue_while_loop
 addRight:
-	cmp r10, #60		@ Added this code to not make guy go past Right Wall
+	bl clear_player
+	cmp r10, #61		@ Added this code to not make guy go past Right Wall
 	addlt r10, r10, #1
 	b continue_while_loop
 subDown:
-	cmp r9, #1		@ Added this code to stop guy from going to high
+	bl clear_player
+	cmp r9, #2		@ Added this code to stop guy from going to high
 	subgt r9, r9, #1
 	b continue_while_loop
 
