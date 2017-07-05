@@ -1,6 +1,7 @@
 # Auto-save files
 *~
 \#*
+.\#*
 
 # generated files
 *.exe
