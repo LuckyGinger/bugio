@@ -32,19 +32,25 @@ empty_mess:
 
 
 .balign 4
-.bss
+.bss // any label created after this point will be be zeroed
 user_name:
 	.space 28
 user_score:
 	.space 4
 file_info:
-	.space 96
+	.space 28 // Name 1
+	.space 4 // Score 1
+        .space 28 // Name 2
+        .space 4 // Score 2
+        .space 28 // Name 3
+        .space 4 // Score 3
+
 
 
 .balign 4
 .text
-.global _get_name
-_get_name:
+.global get_name
+get_name:
 	// Get input from  user
 	mov r0, #STDIN
 	mov32 r1, user_name
@@ -62,15 +68,15 @@ _get_name:
 
 .balign 4
 .text
-.global _hit
-_hit:
+.global hit
+hit:
 	// This function will count a kill point :)
-	mov32 r0, userScore
+	mov32 r0, user_score
 	mov r1, r0 @ This is so we dont loose the memory location
 	ldr r0, [r0] @ Here we are De-Referencing
 	add r0, r0, #1 @ Adding a Kill point
 
-	@ Now add new value back into label
+	@ Now add the new value back into label
 	str r0, [r1]
 
 	bx lr
@@ -98,6 +104,12 @@ _start:
 
 	bl did_user_place // Did the user place in the top three
 
+
+	// Here we need to close the file dont forget
+
+
+
+
 	pop {r4-r9}
 	mov r7, #EXIT
 	svc #0
@@ -105,9 +117,10 @@ _start:
 check_file:
 	// Load file information into .data section
 	mov32 r1, file_info
-	mov r2, #100
+	mov r2, #96
 	mov r7, #READ
 	svc #0
+
 
 	// Load first byte from file and check to see if there is information
 	mov32 r1, file_info
@@ -118,43 +131,30 @@ check_file:
 
 	bx lr
 
-display_scores:
-	push {r4, lr}
-
-	mov r0, #20 //  Middle
-	mov r1, #30 // Screen
-@Add this later	bl locate
-
-	// Print top 3 score from file pulled from memory for now.
-	mov r0, #STDOUT
-	mov32 r1, file_info
-	mov r2, #100
-	mov r7, #WRITE
-	svc #0
-
-	pop {r4, pc}
-
-display_empty_message:
-	mov r0, #20 //  Middle
-	mov r1, #30 // Screen
-@Add this later bl locate
-
-	mov r0, #STDOUT
-        mov32 r1, empty_mess
-        mov r2, #empty_mess_Len
-        mov r7, #WRITE
-        svc #0
-
-	bx lr
-
 did_user_place:
 	push {r4, lr}
+
+	mov32 r0, file_info
+	mov r1, #1 // This is for which place we are compareing here
+	mov r2, #0 // This will contain the score in file
+while_loop:
+	cmp r1, #2
+	ldrtl r2, [r0, #28]
+	ldreq r2, [r0, #60]
+	ldrgt r2, [r0, #92]
+
+	bl convert_score
+
+
+
+
+
 
 	mov32 r0, file_info
 	mov r1, #0 // Shift bit Counter
 	mov r2, #10
 	mov r3, #0 // Contains the byte
-	mov32 r4, userScore // This is used to compare scores
+	mov32 r4, user_score // This is used to compare scores
 	ldr r4, [r4]
 	mov r5, #0 // Used for file number score conversion
 
@@ -198,3 +198,37 @@ compare_scores:
 	mov r5, #0
 
 	pop {r4, pc}
+
+convert_score:
+	ldrb r3
+
+
+display_scores:
+	push {r4, lr}
+
+	mov r0, #20 //  Middle
+	mov r1, #30 // Screen
+@Add this later	bl locate
+
+	// Print top 3 score from file pulled from memory for now.
+	mov r0, #STDOUT
+	mov32 r1, file_info
+	mov r2, #100
+	mov r7, #WRITE
+	svc #0
+
+	pop {r4, pc}
+
+display_empty_message:
+	mov r0, #20 //  Middle
+	mov r1, #30 // Screen
+@Add this later bl locate
+
+	mov r0, #STDOUT
+        mov32 r1, empty_mess
+        mov r2, #empty_mess_Len
+        mov r7, #WRITE
+        svc #0
+
+	bx lr
+
