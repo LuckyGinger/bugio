@@ -39,21 +39,8 @@ userScore:
 	.space 4
 file_info:
 	.space 96
-
-.balign 4
-.text
-.global _hit
-_hit:
-	// This function will count a kill point :)
-	mov32 r0, userScore
-	mov r1, r0 @ This is so we dont loose the memory location
-	ldr r0, [r0] @ Here we are De-Referencing
-	add r0, r0, #1 @ Adding a Kill point
-
-	@ Now add new value back into label
-	str r0, [r1]
-
-	bx lr
+temp_score:
+	.space 4
 
 
 .balign 4
@@ -72,7 +59,6 @@ _start:
 	bl check_file
 
 	blne display_scores
-	bleq display_empty_message
 
 	bl did_user_place // Did the user place in the top three
 
@@ -132,67 +118,42 @@ display_scores:
 
 	pop {r4, pc}
 
-display_empty_message:
-	mov r0, #20 //  Middle
-	mov r1, #30 // Screen
-@Add this later bl locate
-
-	mov r0, #STDOUT
-        mov32 r1, empty_mess
-        mov r2, #empty_mess_Len
-        mov r7, #WRITE
-        svc #0
-
-	bx lr
-
 did_user_place:
 	push {r4, lr}
 
 	mov32 r0, file_info
 	mov r1, #0 // Shift bit Counter
-	mov r2, #10
-	mov r3, #0 // Contains the byte
-	mov32 r4, userScore // This is used to compare scores
-	ldr r4, [r4]
-	mov r5, #0 // Used for file number score conversion
-
+	mov r2, #1 // Top Player = 1 if r3 = 2 then we are at second top PLayer etc
+	mov32 r4, temp_score // This is used to compare scores
 while_loop:
-	ldrb r3, [r0, r1]
-
-	cmp r3, #57
-	movgt r3, #100
-	cmp r3, #32
-	moveq r3, #100
+	ldrb r0, [r0, r1]
+	cmp r0, #57
+	movgt r0, #100
+	cmp r0, #32
+	moveq r0, #100
 
 	// If at the end of the line then lets compare scores
-	cmp r3, #10
+	cmp #10, r0
 	bleq compare_scores
 
-	// Loop from the begining if number did not exist
 	cmp r0, #100
+	// Here we will store 1 score from the file one by one and comparing
+	strbne r0, [r4, #1]
+	cmp r0, #10
+
+	bl compare_scores
+
 	beq while_loop
 
-	// If Equal then we are at end of File
-	cmp r3, #0
-	beq finish_loop
-
-	// Go ahead and convert user score into a register
-	mul r5, r2, r5
-	add r5, r3, r5
-	b while_loop
-finish_loop:
 	pop {r4, pc}
 
 compare_scores:
 	push {r4, lr}
 
-	cmp r4, r5 // r4 = user score, r5 = file score "one of the file scores"
-	@ Here if the greater than flag is set then the user has a high score
-
-
+	// Get user score here either from a register or from the .data section
 	
-
-	// Need to reset the register r5 = 0
-	mov r5, #0
+	
+	cmp r0, r1 // r0 = user score, r1 = file score "one of the file scores"
+	
 
 	pop {r4, pc}
