@@ -33,12 +33,32 @@ empty_mess:
 
 .balign 4
 .bss
-userName:
+user_name:
 	.space 28
-userScore:
+user_score:
 	.space 4
 file_info:
 	.space 96
+
+
+.balign 4
+.text
+.global _get_name
+_get_name:
+	// Get input from  user
+	mov r0, #STDIN
+	mov32 r1, user_name
+	mov r2, #32
+	mov r7, #READ
+	svc #0
+
+
+/*	// Write to File Save for later
+	mov r0, r4
+	mov32 r1, userName
+	mov r2, #6
+	mov r7, #WRITE
+	svc #0*/
 
 .balign 4
 .text
@@ -69,6 +89,8 @@ _start:
 	mov r7, #OPEN
 	svc #0
 
+	mov r8, r0 // Need to save the file descriptor
+
 	bl check_file
 
 	blne display_scores
@@ -77,11 +99,8 @@ _start:
 	bl did_user_place // Did the user place in the top three
 
 	pop {r4-r9}
-
 	mov r7, #EXIT
 	svc #0
-
-
 
 check_file:
 	// Load file information into .data section
@@ -98,23 +117,6 @@ check_file:
 	cmp r1, #0
 
 	bx lr
-
-
-continue:
-	// Get input from  user
-	mov r0, #STDIN
-	mov32 r1, userName
-	mov r2, #32
-	mov r7, #READ
-	svc #0
-
-	// Write to File
-	mov r0, r4
-	mov32 r1, userName
-	mov r2, #6
-	mov r7, #WRITE
-	svc #0
-
 
 display_scores:
 	push {r4, lr}
