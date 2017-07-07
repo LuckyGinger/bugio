@@ -141,8 +141,6 @@ init_bullet:
 
 clear_bullet:
 	push {r0, r1, lr}
-
-	add r0, r0, #1
 	
 	bl locate
 
@@ -153,29 +151,29 @@ clear_bullet:
 	svc #0
 
 	pop {r0, r1, pc}
-//	mov lr, r4
-//	bx lr
 	
 	
 draw_bullet:
 	mov r4, lr
 
 	pop {r0, r1, r6, r7}
-	
-	sub r0, r0, #1
 
-	sub r7, r9, #1 
-	cmp r0, r7
+	// clear previous bullet
+	cmp r0, r9
 	blne clear_bullet
-	
-	cmp r0, #2
-	movle r6, #0
+
+	sub r0, r0, #1
 
 	push {r0, r1, r6, r7}
 
+	// don't display the bullet if bullet gets to the top
+	cmp r0, #1
+	movle r6, #0
+        moveq lr, r4
+	bxeq lr
 
+	// otherwise display the bullet
 	bl locate @ This locate is erasing the r0 and r1
-
 
 	mov r0, #STDOUT
 	mov32 r1, bullet
