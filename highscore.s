@@ -6,16 +6,24 @@
 .set WRITE, 4
 .set OPEN, 5
 .set CLOSE, 6
+.set MMAP2, 192
 
 @ Constants for System Calls
 .set STDIN, 0
 .set STDOUT, 1
+
+.set MAP_SHARED, 1
+.set MUNMMAP, 91
+.set PROT_READ, 1
+.set PROT_WRITE, 2
+.set MAP_FLAGS, (PROT_READ | PROT_WRITE)
+
 .set O_WRONLY, 1
-.set O_CREAT, 64
 .set O_RDWR , 2
+.set O_CREAT, 64
 .set O_TRUNC, 512
 .set O_APPEND, 1024
-.set CREAT_FLAGS, (/*O_WRONLY*/O_RDWR | O_APPEND | O_CREAT/* | O_TRUNC*/)
+.set FILE_FLAGS, (/*O_WRONLY*/O_RDWR | O_APPEND | O_CREAT/* | O_TRUNC*/)
 
 
 .balign 4
@@ -29,7 +37,9 @@ newline:
 empty_mess:
 	.ascii "Empty File::::\n\0"
 	.set empty_mess_Len, .-empty_mess
-
+you_placed:
+	.ascii "Congragulations you placed in the top 3.\n\0"
+	.set you_placed_Len, .-you_placed
 
 .balign 4
 .bss // any label created after this point will be be zeroed
@@ -37,13 +47,15 @@ user_name:
 	.space 28
 user_score:
 	.space 4
+user_score_ascii:
+	.space 4
 file_info:
-	.space 28 // Name 1
-	.space 4 // Score 1
-        .space 28 // Name 2
-        .space 4 // Score 2
-        .space 28 // Name 3
-        .space 4 // Score 3
+	.space 10 // Name 1
+	.word 4 // Score 1
+        .space 10 // Name 2
+        .word 4 // Score 2
+        .space 10 // Name 3
+        .word 4 // Score 3
 
 
 
@@ -81,6 +93,30 @@ hit:
 
 	bx lr
 
+.balign 4
+.text
+.global score_to_ascii
+score_to_ascii:
+	push {r4-r7}
+
+	mov32 r4, user_score
+	ldr r5, [r4]
+	mov r6, #10
+	mov r2, #-3
+loop:
+	sdiv r5, r5, r6
+	cmp r5, #10
+	mul r7, r6, r5
+	subs r7, r5, r7
+	add r7, #48
+	strb r7, [r4, r2]
+	subs r2, #1
+	bgt loop
+
+
+
+	//strb [
+	pop {r4-r7}
 
 .balign 4
 .text
@@ -88,16 +124,9 @@ hit:
 _start:
 	push {r4-r9}
 
-	// OpenFile or Create Highscore File
-	mov32 r0, filename
-	movw r1, #CREAT_FLAGS
-	movw r2, #00644 // Permission for File number 644 ultimate power
-	mov r7, #OPEN
-	svc #0
-
-	mov r8, r0 // Need to save the file descriptor
-
-	bl check_file
+	bl open_file // returns the file descriptor in r0
+	mov r6, r0 // Need to save the file descriptor else where
+	bl unload_file // load file descriptor and content into mmap2. Also returns the mmap address in r4
 
 	blne display_scores
 	bleq display_empty_message
@@ -105,26 +134,39 @@ _start:
 	bl did_user_place // Did the user place in the top three
 
 
-	// Here we need to close the file dont forget
-
-
-
-
 	pop {r4-r9}
 	mov r7, #EXIT
 	svc #0
 
-check_file:
-	// Load file information into .data section
-	mov32 r1, file_info
-	mov r2, #96
-	mov r7, #READ
+open_file:
+	mov32 r0, filename
+	movw r1, #FILE_FLAGS
+	movw r2, #00644 // Permission for File number 644 ultimate power
+	mov r7, #OPEN
 	svc #0
 
+	bx lr
+
+unload_file:
+	// First allocate 2k of memory
+	mov r0, #0
+	mov r1, #2000
+	mov r2, #MAP_FLAGS
+	mov r3, #MAP_SHARED
+	mov r4, r6
+	mov r5, #0
+	mov r7, #MMAP2
+	svc #0
+
+	mov r4, r0 // Keep the address of mmap.
+
+	// We can close the file here and keep mmap open.
+	mov r0, r6 // r6 = file descriptor
+	mov r7, #CLOSE
+	svc #0
 
 	// Load first byte from file and check to see if there is information
-	mov32 r1, file_info
-	ldrb r1, [r1]
+	ldrb r1, [r4]
 
 	// If r0 = 0, then file is empty :: if r0 = any #, then file contains something
 	cmp r1, #0
@@ -134,53 +176,42 @@ check_file:
 did_user_place:
 	push {r4, lr}
 
-	mov32 r0, file_info
-	mov r1, #1 // This is for which place we are compareing here
-	mov r2, #0 // This will contain the score in file
-while_loop:
-	cmp r1, #2
-	ldrtl r2, [r0, #28]
-	ldreq r2, [r0, #60]
-	ldrgt r2, [r0, #92]
-
-	bl convert_score
-
-
-
-
-
-
-	mov32 r0, file_info
-	mov r1, #0 // Shift bit Counter
-	mov r2, #10
-	mov r3, #0 // Contains the byte
+	mov r0, r4 // mmap memory address
+	mov r1, #0 // This is for which place we are compareing here
+	mov r2, #0 // This will contain the score in file byte at a time
+	mov r3, #0 // This is our counter
 	mov32 r4, user_score // This is used to compare scores
 	ldr r4, [r4]
-	mov r5, #0 // Used for file number score conversion
-
+	mov r5, #0 // number of file after r2 conversion
+	mov r6, #10 // For multiplication purposes
+	mov r7, #0
 while_loop:
-	ldrb r3, [r0, r1]
+	ldrb r2, [r0, r3]
 
-	cmp r3, #57
-	movgt r3, #100
-	cmp r3, #32
-	moveq r3, #100
+	cmp r2, #57
+	movgt r2, #100
+	cmp r2, #32
+	moveq r2, #100
 
 	// If at the end of the line then lets compare scores
-	cmp r3, #10
+	cmp r2, #10
 	bleq compare_scores
 
+	add r3, #1 // add counter
+
 	// Loop from the begining if number did not exist
-	cmp r0, #100
+	cmp r2, #100
 	beq while_loop
 
 	// If Equal then we are at end of File
-	cmp r3, #0
+	cmp r2, #0
 	beq finish_loop
 
 	// Go ahead and convert user score into a register
-	mul r5, r2, r5
-	add r5, r3, r5
+	mul r5, r6, r5
+	subs r2, #48
+	add r5, r2, r5
+	add r7, #1
 	b while_loop
 finish_loop:
 	pop {r4, pc}
@@ -188,20 +219,18 @@ finish_loop:
 compare_scores:
 	push {r4, lr}
 
-	cmp r4, r5 // r4 = user score, r5 = file score "one of the file scores"
-	@ Here if the greater than flag is set then the user has a high score
-
-
-	
-
-	// Need to reset the register r5 = 0
-	mov r5, #0
+	cmp r4, r5 // r5 = user score, r4 = file score "one of the file scores"
+	blt user_placed
+	add r1, #1
+	mov r5, #0 // reset this value otherwise things will go off when converting
 
 	pop {r4, pc}
 
-convert_score:
-	ldrb r3
 
+
+user_placed:
+	cmp r3, #29
+	str r5, [r0, #10]
 
 display_scores:
 	push {r4, lr}
@@ -220,6 +249,8 @@ display_scores:
 	pop {r4, pc}
 
 display_empty_message:
+	push {r4, lr}
+
 	mov r0, #20 //  Middle
 	mov r1, #30 // Screen
 @Add this later bl locate
@@ -230,5 +261,4 @@ display_empty_message:
         mov r7, #WRITE
         svc #0
 
-	bx lr
-
+	pop {r4, pc}
