@@ -141,7 +141,7 @@ init_bullet:
 
 clear_bullet:
 	push {r0, r1, lr}
-	
+
 	bl locate
 
 	mov r0, #STDOUT
@@ -151,8 +151,7 @@ clear_bullet:
 	svc #0
 
 	pop {r0, r1, pc}
-	
-	
+
 draw_bullet:
 	mov r4, lr
 
@@ -165,6 +164,10 @@ draw_bullet:
 	sub r0, r0, #1
 
 	push {r0, r1, r6, r7}
+
+	// Collision detection
+	cmp r0, #5                 @ Where the spider reaches down to
+	bleq check_collision
 
 	// don't display the bullet if bullet gets to the top
 	cmp r0, #1
@@ -181,7 +184,6 @@ draw_bullet:
 	mov r7, #WRITE
 	svc #0
 
-	
 	mov r0, #CLOCK_REALTIME
 	mov r1, #0
 	mov32 r2, timespec
@@ -190,6 +192,21 @@ draw_bullet:
 	svc #0
 
 	mov lr, r4
+	bx lr
+
+check_collision:
+	cmp r1, #26         @ is it less than where the spider starts?
+	bxls lr             @ then do nothing and go back
+
+	cmp r1, #35         @ is it greater than where the spider goes to the right?
+	bxhi lr             @ Then do nothing and go back
+
+	// Add to the score
+//	bl hit
+
+	mov r6, #0          @ Kill the bullet
+	mov lr, r4          @ put the return for the bullet function to lr
+
 	bx lr
 
 .global reset_cursor
@@ -217,7 +234,7 @@ _start:
 	bl draw_spider
 
 	bl draw_player
-	
+
 	sub sp, sp, #1
 
 while_loop:
@@ -235,7 +252,7 @@ while_loop:
 	// If nothing was read, don't bother writing
 	cmp r0, #0
 	beq skip_print
-	
+
 	ldrb r0, [sp]
 
 	cmp r0, #97        @ a
