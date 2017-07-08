@@ -140,12 +140,8 @@ init_bullet:
 	b continue_while_loop
 
 clear_bullet:
-	mov r4, lr
-
-	push {r3, r4}
-	mov r3, r0
-	mov r4, r1
-
+	push {r0, r1, lr}
+	
 	bl locate
 
 	mov r0, #STDOUT
@@ -153,33 +149,31 @@ clear_bullet:
 	mov r2, #clear_body_len
 	mov r7, #WRITE
 	svc #0
-	
-	mov r0, r3
-	mov r1, r4
 
-	pop {r3, r4}
-	
-	mov lr, r4
-	bx lr
+	pop {r0, r1, pc}
 	
 	
 draw_bullet:
 	mov r4, lr
 
-
-
 	pop {r0, r1, r6, r7}
-	bl clear_bullet
+
+	// clear previous bullet
+	cmp r0, r9
+	blne clear_bullet
+
 	sub r0, r0, #1
 
-	cmp r0, #2
-	movle r6, #0
-@	movle lr, r4
-@	bxle lr
-
 	push {r0, r1, r6, r7}
-	bl locate @ This locate is erasing the r0 and r1
 
+	// don't display the bullet if bullet gets to the top
+	cmp r0, #1
+	movle r6, #0
+        moveq lr, r4
+	bxeq lr
+
+	// otherwise display the bullet
+	bl locate @ This locate is erasing the r0 and r1
 
 	mov r0, #STDOUT
 	mov32 r1, bullet
@@ -187,6 +181,7 @@ draw_bullet:
 	mov r7, #WRITE
 	svc #0
 
+	
 	mov r0, #CLOCK_REALTIME
 	mov r1, #0
 	mov32 r2, timespec
