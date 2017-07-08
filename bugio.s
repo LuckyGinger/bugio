@@ -167,7 +167,7 @@ draw_bullet:
 
 	// Collision detection
 	cmp r0, #5                 @ Where the spider reaches down to
-	bleq check_collision
+	blls check_collision
 
 	// don't display the bullet if bullet gets to the top
 	cmp r0, #1
