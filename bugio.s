@@ -130,6 +130,7 @@ draw_spider:
 	mov lr, r4
 	bx lr
 
+
 init_bullet:
 	mov r6, #1      @ isLive bullet
 	mov r0, r9      @ y pos
@@ -201,6 +202,23 @@ check_collision:
 	cmp r1, #35         @ is it greater than where the spider goes to the right?
 	bxhi lr             @ Then do nothing and go back
 
+	beq hit_35_27       @ is it equal to 35?
+
+	cmp r1, #33
+	beq hit_33_29
+
+	cmp r1, #29
+	beq hit_33_29
+
+	cmp r1, #27
+	beq hit_35_27
+
+	b hit_34_32_31_30_28   @ All these are equal heights
+
+hit_35_27:
+	cmp r0, #3
+	bxne lr
+
 	// Add to the score
 //	bl hit
 
@@ -208,6 +226,28 @@ check_collision:
 	mov lr, r4          @ put the return for the bullet function to lr
 
 	bx lr
+
+hit_33_29:
+	// Add to the score
+//	bl hit
+
+	mov r6, #0          @ Kill the bullet
+	mov lr, r4          @ put the return for the bullet function to lr
+
+	bx lr
+
+hit_34_32_31_30_28:
+	cmp r0, #4
+	bxne lr
+
+	// Add to the score
+//	bl hit
+
+	mov r6, #0          @ Kill the bullet
+	mov lr, r4          @ put the return for the bullet function to lr
+
+	bx lr
+
 
 .global reset_cursor
 reset_cursor:
