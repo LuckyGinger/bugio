@@ -16,7 +16,7 @@
 .set MUNMMAP, 91
 .set PROT_READ, 1
 .set PROT_WRITE, 2
-.set MAP_FLAGS, (PROT_READ | PROT_WRITE)
+.set MAP_PROT, (PROT_READ | PROT_WRITE)
 
 .set O_WRONLY, 1
 .set O_RDWR , 2
@@ -39,6 +39,7 @@ empty_mess:
 	.set empty_mess_Len, .-empty_mess
 you_placed:
 	.ascii "Congragulations you placed in the top 3.\n\0"
+	.ascii "     Please enter your name: \0"
 	.set you_placed_Len, .-you_placed
 // Delete later and add the one below
 user_score:
@@ -67,18 +68,27 @@ file_info:
 .global get_name
 get_name:
 	// Move cursor to middle of screen
-	mov r0, #9
-	mov r1, #25
-	bl locate
+@	mov r0, #9
+@	mov r1, #25
+@	bl locate
+
+	// Print a message to the user for input
+	mov r0, #STDOUT
+        mov32 r1, you_placed
+        mov r2, #you_placed_Len
+        mov r7, #WRITE
+        svc #0
+
+
 
 	// Get input from  user
 	mov r0, #STDIN
 	mov32 r1, user_name
-	mov r2, #32
+	mov r2, #10
 	mov r7, #READ
 	svc #0
 
-
+	bx lr
 /*	// Write to File Save for later
 	mov r0, r4
 	mov32 r1, userName
@@ -141,6 +151,7 @@ _start:
 	bl did_user_place // Did the user place in the top three
 
 	cmp r1, #1
+	bleq get_name
 	bleq add_new_score
 	blne sorry_message // if r1 != 1 then they did place into top score file
 
@@ -161,7 +172,7 @@ unload_file:
 	// First allocate 2k of memory
 	mov r0, #0
 	mov r1, #2000
-	mov r2, #MAP_FLAGS
+	mov r2, #MAP_PROT
 	mov r3, #MAP_SHARED
 	mov r4, r6
 	mov r5, #0
@@ -240,14 +251,28 @@ compare_scores:
 add_new_score:
 	mov32 r1, file_info // Temporary memory holder
 	mov32 r2, user_name // Get user name
-	sub r3, r3, #15 // This shifts the pointer of memory to the begining line
-	str r2, [r1, r3] // This stores the name of user into the line hopefully
+
+	sub r3, r3, #14 // This shifts the pointer of memory to the begining line
+	cmp r3, #15
+	blt first_place
+	beq second_place
+	bgt third_place
+
+	ldr r5, [r2]
+	str r5, [r1]
+	ldr r5, [r2, #4]
+	str r5, [r1, #4]
+	ldr r5, [r2, #8]
+	str r5, [r2, #8]
+
 
 	mov r0, #STDOUT
         mov32 r1, file_info
         mov r2, #9
         mov r7, #WRITE
         svc #0
+
+	bx lr
 
 
 sorry_message:
