@@ -27,12 +27,13 @@ side_wall:
 .text
 .global draw_game
 draw_game:
+	push {r11, r12}
 	mov r3, lr
 @	mov r9, #20     @ Test row for Bugio, This code should eventually be commented out
 @	mov r10, #30    @ Test Column for bugio, Eventually will be commented out
 	mov r11, #21    @ Screen Height
 	mov r12, #1     @ Counter to track row number
-
+	
 draw_topBot:
 	@ Draws the top or bottom row of tildas
 	mov r0, #STDOUT
@@ -52,6 +53,7 @@ draw_topBot:
 	cmp r12, r11
 	bne draw_leftWall
 
+	pop {r11, r12}
 	mov lr, r3
 	bx lr
 @	mov r7, #EXIT
