@@ -293,7 +293,6 @@ while_loop:
 	cmp r0, #0
 	beq skip_print
 
-	mov r3, r0
 	ldrb r0, [sp]
 
 	cmp r0, #97        @ a
@@ -312,7 +311,6 @@ while_loop:
 	beq init_bullet
 
 continue_while_loop:
-	mov r0, r3
 	bl draw_player
 
 	bl draw_spider
