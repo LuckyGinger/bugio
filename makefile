@@ -16,6 +16,9 @@ term.o: term.s
 draw_game.o: draw_game.s
 	as -o $@ $<
 
+highscore.o: highscore.s
+	as -o $@ $<
+
 #spider.o: spider.s
 #	as -o $@ $<
 

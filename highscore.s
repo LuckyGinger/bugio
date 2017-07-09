@@ -40,13 +40,16 @@ empty_mess:
 you_placed:
 	.ascii "Congragulations you placed in the top 3.\n\0"
 	.set you_placed_Len, .-you_placed
+// Delete later and add the one below
+user_score:
+	.word 120
 
 .balign 4
 .bss // any label created after this point will be be zeroed
 user_name:
-	.space 28
-user_score:
-	.space 4
+	.space 10
+//user_score:
+	//.space 4
 user_score_ascii:
 	.space 4
 file_info:
@@ -63,6 +66,11 @@ file_info:
 .text
 .global get_name
 get_name:
+	// Move cursor to middle of screen
+	mov r0, #9
+	mov r1, #25
+	bl locate
+
 	// Get input from  user
 	mov r0, #STDIN
 	mov32 r1, user_name
@@ -84,12 +92,11 @@ get_name:
 hit:
 	// This function will count a kill point :)
 	mov32 r0, user_score
-	mov r1, r0 @ This is so we dont loose the memory location
-	ldr r0, [r0] @ Here we are De-Referencing
-	add r0, r0, #1 @ Adding a Kill point
+	ldr r1, [r0] @ Here we are De-Referencing
+	add r1, r1, #1 @ Adding a Kill point
 
 	@ Now add the new value back into label
-	str r0, [r1]
+	str r1, [r0]
 
 	bx lr
 
@@ -133,6 +140,9 @@ _start:
 
 	bl did_user_place // Did the user place in the top three
 
+	cmp r1, #1
+	bleq add_new_score
+	blne sorry_message // if r1 != 1 then they did place into top score file
 
 	pop {r4-r9}
 	mov r7, #EXIT
@@ -173,16 +183,17 @@ unload_file:
 
 	bx lr
 
+@ This functio sets variables some variables will change others wont
 did_user_place:
 	push {r4, lr}
 
 	mov r0, r4 // mmap memory address
-	mov r1, #0 // This is for which place we are compareing here
+	mov r1, #0 // This is a flag if r1 = 0 then did not make top 3, else if r1 = 1 then user placed in top
 	mov r2, #0 // This will contain the score in file byte at a time
 	mov r3, #0 // This is our counter
 	mov32 r4, user_score // This is used to compare scores
 	ldr r4, [r4]
-	mov r5, #0 // number of file after r2 conversion
+	mov r5, #0 // number from file after r2 conversion
 	mov r6, #10 // For multiplication purposes
 	mov r7, #0
 while_loop:
@@ -197,40 +208,50 @@ while_loop:
 	cmp r2, #10
 	bleq compare_scores
 
+	// If Equal then we are at end of File
+	cmp r2, #0
+	beq finish_loop
+
 	add r3, #1 // add counter
 
 	// Loop from the begining if number did not exist
 	cmp r2, #100
 	beq while_loop
 
-	// If Equal then we are at end of File
-	cmp r2, #0
-	beq finish_loop
-
 	// Go ahead and convert user score into a register
 	mul r5, r6, r5
 	subs r2, #48
 	add r5, r2, r5
-	add r7, #1
 	b while_loop
 finish_loop:
-	pop {r4, pc}
+	pop {r2, pc}
 
 compare_scores:
 	push {r4, lr}
 
-	cmp r4, r5 // r5 = user score, r4 = file score "one of the file scores"
-	blt user_placed
-	add r1, #1
+	cmp r4, r5 // r4 = user score, r5 = file score "one of the file scores"
+	movle r2, #100 // This will kick out of the while_loop
+	movgt r2, #0
+	movgt r1, #1 // This indicates that the user placed in the top 3
 	mov r5, #0 // reset this value otherwise things will go off when converting
 
 	pop {r4, pc}
 
+add_new_score:
+	mov32 r1, file_info // Temporary memory holder
+	mov32 r2, user_name // Get user name
+	sub r3, r3, #15 // This shifts the pointer of memory to the begining line
+	str r2, [r1, r3] // This stores the name of user into the line hopefully
+
+	mov r0, #STDOUT
+        mov32 r1, file_info
+        mov r2, #9
+        mov r7, #WRITE
+        svc #0
 
 
-user_placed:
-	cmp r3, #29
-	str r5, [r0, #10]
+sorry_message:
+
 
 display_scores:
 	push {r4, lr}

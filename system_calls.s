@@ -1,5 +1,10 @@
-
+@ System Calls
 .set EXIT, 1
+.set READ, 3
+.set WRITE, 4
+.set OPEN, 5
+.set CLOSE, 6
+.set MMAP2, 192
 
 .set STDIN,  0
 .set STDOUT, 1
@@ -23,7 +28,21 @@
 .set ISPEED, 52
 .set OSPEED, 56
 
-.set READ,  0x03
-.set WRITE, 0x04
 .set IOCTL, 0x36
+
+// MMAP crud
+.set MAP_ANONYMOUS, 32
+.set MAP_SHARED, 1
+.set MUNMMAP, 91
+.set PROT_READ, 1
+.set PROT_WRITE, 2
+.set MAP_PROT, (PROT_READ | PROT_WRITE)
+.set MAP_FLAGS, (MAP_ANONYMOUS | MAP_SHARED)
+
+.set O_WRONLY, 1
+.set O_RDWR , 2
+.set O_CREAT, 64
+.set O_TRUNC, 512
+.set O_APPEND, 1024
+.set FILE_FLAGS, (/*O_WRONLY*/O_RDWR | O_APPEND | O_CREAT/* | O_TRUNC*/)
 

@@ -130,18 +130,19 @@ draw_spider:
 	mov lr, r4
 	bx lr
 
-
 init_bullet:
-	mov r6, #1      @ isLive bullet
 	mov r0, r9      @ y pos
-	mov r1, r10	@ x pos
+	mov r1, r10     @ x pos
 
-	push {r0, r1, r6, r7}
+//	sub r0, r0, #1      @ 1 higher than the character
+
+	strb r0, [r11, #0]
+	strb r1, [r11, #1]
 
 	b continue_while_loop
 
 clear_bullet:
-	push {r0, r1, lr}
+	push {r0, r1, r7, lr}
 
 	bl locate
 
@@ -151,20 +152,26 @@ clear_bullet:
 	mov r7, #WRITE
 	svc #0
 
-	pop {r0, r1, pc}
+	pop {r0, r1, r7, pc}
+
 
 draw_bullet:
 	mov r4, lr
 
-        pop {r0, r1, r6, r7}
+	ldrb r0, [r11, #0]   @ y pos
+	ldrb r1, [r11, #1]   @ x pos
 
-	// clear previous bullet
+	cmp r0, #0           @ does this bullet exist?
+	bxeq lr
+
 	cmp r0, r9
 	blne clear_bullet
 
 	sub r0, r0, #1
 
-	push {r0, r1, r6, r7}
+	// Store back on heap
+	strb r0, [r11, #0]
+	strb r1, [r11, #1]
 
 	// Collision detection
 	cmp r0, #5                 @ Where the spider reaches down to
@@ -194,6 +201,24 @@ draw_bullet:
 
 	mov lr, r4
 	bx lr
+
+
+/*
+draw_bullet:
+	mov r4, lr
+
+        pop {r0, r1, r6, r7}
+
+	// clear previous bullet
+	cmp r0, r9
+	blne clear_bullet
+
+	sub r0, r0, #1
+
+	push {r0, r1, r6, r7}
+
+*/
+
 
 check_collision:
 	cmp r1, #26         @ is it less than where the spider starts?
@@ -277,6 +302,21 @@ _start:
 
 	sub sp, sp, #1
 
+	// Map that crap
+        mov r0, #0
+        mov r1, #2000
+        mov r2, #MAP_PROT
+        mov r3, #MAP_ANONYMOUS
+        mov r4, #-1
+        mov r5, #0
+        mov r7, #MMAP2
+        svc #0
+
+	mov r11, r0     @ Set r11 as the location of the mapped memory
+
+	mov r0, #0
+ 	strb r0, [r11]
+
 while_loop:
 	// get movement from user
 	mov r7, #READ
@@ -285,9 +325,6 @@ while_loop:
 	mov r2, #1
 	svc #0
 
-	@Testing something here ignore for now
-	cmp r6, #1
-	bleq draw_bullet
 
 	// If nothing was read, don't bother writing
 	cmp r0, #0
@@ -312,6 +349,8 @@ while_loop:
 
 continue_while_loop:
 	bl draw_player
+
+//	bl draw_bullet
 
 	bl draw_spider
 
