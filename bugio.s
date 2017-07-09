@@ -314,8 +314,8 @@ _start:
 
 	mov r11, r0     @ Set r11 as the location of the mapped memory
 
-	mov r0, #0
- 	strb r0, [r11]
+//	mov r0, #0
+// 	strb r0, [r11]
 
 while_loop:
 	// get movement from user

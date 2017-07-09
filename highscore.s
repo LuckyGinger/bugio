@@ -16,7 +16,7 @@
 .set MUNMMAP, 91
 .set PROT_READ, 1
 .set PROT_WRITE, 2
-.set MAP_FLAGS, (PROT_READ | PROT_WRITE)
+//.set MAP_FLAGS, (PROT_READ | PROT_WRITE)
 
 .set O_WRONLY, 1
 .set O_RDWR , 2

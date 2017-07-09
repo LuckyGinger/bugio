@@ -87,6 +87,7 @@ fore_color:
 
 .global spider_color
 spider_color:
+	push {r0, r1}
         cmp r0, #10
         bxpl lr
 
@@ -100,6 +101,7 @@ spider_color:
         mov r2, #5
         svc #0
 
+	pop {r0, r1}
         bx lr
 
 .global back_color
