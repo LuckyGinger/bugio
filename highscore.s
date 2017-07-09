@@ -253,18 +253,11 @@ add_new_score:
 	mov32 r2, user_name // Get user name
 
 	sub r3, r3, #14 // This shifts the pointer of memory to the begining line
-	cmp r3, #15
-	blt first_place
-	beq second_place
-	bgt third_place
-
-	ldr r5, [r2]
-	str r5, [r1]
-	ldr r5, [r2, #4]
-	str r5, [r1, #4]
-	ldr r5, [r2, #8]
-	str r5, [r2, #8]
-
+	cmp r3, #0
+	bleq copy_info
+	cmp r3, #30
+	bllt place_player
+	bleq replace_last_place
 
 	mov r0, #STDOUT
         mov32 r1, file_info
@@ -274,7 +267,19 @@ add_new_score:
 
 	bx lr
 
+place_player:
+	ldr r5, [r2, r3]
+	str r5, [r1, r3]
+	add r3, #4
+	ldr r5, [r2, r3]
+	str r5, [r1, r3]
+	add r3, #4
+	ldr r5, [r2, r3]
+	str r5, [r2, r3]
 
+	bx lr
+copy_info:
+	ldr r0
 sorry_message:
 
 
