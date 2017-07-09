@@ -155,7 +155,7 @@ clear_bullet:
 draw_bullet:
 	mov r4, lr
 
-	pop {r0, r1, r6, r7}
+        pop {r0, r1, r6, r7}
 
 	// clear previous bullet
 	cmp r0, r9
@@ -253,6 +253,7 @@ while_loop:
 	cmp r0, #0
 	beq skip_print
 
+	mov r3, r0
 	ldrb r0, [sp]
 
 	cmp r0, #97        @ a
@@ -271,24 +272,21 @@ while_loop:
 	beq init_bullet
 
 continue_while_loop:
-	bl cursor_home
+	mov r0, r3
 	bl draw_player
 
 	bl draw_spider
 
-	cmp r0, #27
-	bne while_loop
-
 skip_print:
 	ldrb r0, [sp]
 
-	cmp r0, #27    // Escape Key / Alt Key
-	bne while_loop // Go back if
+	cmp r0, #27        @ esc
+	bne while_loop
 
 	add sp, sp, #1
 	bl term_quit
 
-	bl cursor_show  // need to re-show the cursor
+	bl cursor_show
 
 	bl reset_cursor
 
