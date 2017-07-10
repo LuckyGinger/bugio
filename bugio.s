@@ -178,7 +178,7 @@ draw_bullet:
 	blls check_collision
 
 	// don't display the bullet if bullet gets to the top
-	cmp r0, #1
+	cmp r0, #2
 	movle r6, #0
         moveq lr, r4
 	bxeq lr
@@ -199,8 +199,9 @@ draw_bullet:
 	movw r7, #CLOCK_NANOSLEEP
 	svc #0
 
-	mov lr, r4
-	bx lr
+	b continue_while_loop
+//	mov lr, r4
+//	bx lr
 
 
 /*
@@ -306,7 +307,7 @@ _start:
         mov r0, #0
         mov r1, #2000
         mov r2, #MAP_PROT
-        mov r3, #MAP_ANONYMOUS
+        mov r3, #MAP_FLAGS
         mov r4, #-1
         mov r5, #0
         mov r7, #MMAP2
@@ -314,8 +315,8 @@ _start:
 
 	mov r11, r0     @ Set r11 as the location of the mapped memory
 
-//	mov r0, #0
-//	strb r0, [r11]
+	mov r0, #0
+	strb r0, [r11]
 
 while_loop:
 	// get movement from user
@@ -325,6 +326,7 @@ while_loop:
 	mov r2, #1
 	svc #0
 
+	//bl draw_bullet
 
 	// If nothing was read, don't bother writing
 	cmp r0, #0
@@ -350,7 +352,7 @@ while_loop:
 continue_while_loop:
 	bl draw_player
 
-//	bl draw_bullet
+	bl draw_bullet
 
 	bl draw_spider
 
