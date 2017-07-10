@@ -219,7 +219,7 @@ hit_35_27:
 	bxne lr
 
 	// Add to the score
-//	bl hit
+	bl hit
 
 	mov r0, #0          @ Kill the bullet
 	strb r0, [r11, #0]
@@ -233,7 +233,7 @@ hit_33_29:
 	bxne lr
 	
 	// Add to the score
-//	bl hit
+	bl hit
 
 	mov r0, #0          @ Kill the bullet
 	strb r0, [r11, #0]
@@ -247,7 +247,7 @@ hit_34_32_31_30_28:
 	bxne lr
 
 	// Add to the score
-//	bl hit
+	bl hit
 
 	mov r0, #0          @ Kill the bullet
 	strb r0, [r11, #0]
