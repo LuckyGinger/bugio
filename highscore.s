@@ -137,7 +137,7 @@ loop:
 .balign 4
 .text
 .global _start
-_start:
+highscore://_start:
 	push {r4-r9}
 
 	bl open_file // returns the file descriptor in r0
