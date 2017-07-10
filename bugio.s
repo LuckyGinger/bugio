@@ -170,7 +170,6 @@ draw_bullet:
 	sub r0, r0, #1
 
 	// Store back on heap
-	strb r0, [r11, #0]
 	strb r1, [r11, #1]
 
 	// Collision detection
@@ -243,6 +242,8 @@ hit_35_27:
 //	bl hit
 
 	mov r0, #0          @ Kill the bullet
+	strb r0, [r11, #0]
+
 	mov lr, r4          @ put the return for the bullet function to lr
 
 	bx lr
@@ -255,6 +256,8 @@ hit_33_29:
 //	bl hit
 
 	mov r0, #0          @ Kill the bullet
+	strb r0, [r11, #0]
+
 	mov lr, r4          @ put the return for the bullet function to lr
 
 	bx lr
@@ -267,6 +270,8 @@ hit_34_32_31_30_28:
 //	bl hit
 
 	mov r0, #0          @ Kill the bullet
+	strb r0, [r11, #0]
+
 	mov lr, r4          @ put the return for the bullet function to lr
 
 	bx lr
