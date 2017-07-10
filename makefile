@@ -1,7 +1,7 @@
 # Makefile
 all: bugio.exe
 
-bugio.exe: bugio.o cursor.o term.o draw_game.o #spider.o
+bugio.exe: highscore.o bugio.o cursor.o term.o draw_game.o #spider.o
 	ld -o $@ $+
 
 bugio.o: bugio.s
