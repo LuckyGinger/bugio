@@ -170,7 +170,6 @@ draw_bullet:
 	sub r0, r0, #1
 
 	// Store back on heap
-	strb r0, [r11, #0]
 	strb r1, [r11, #1]
 
 	// Collision detection
@@ -179,9 +178,11 @@ draw_bullet:
 
 	// don't display the bullet if bullet gets to the top
 	cmp r0, #1
-	movle r6, #0
-        moveq lr, r4
-	bxeq lr
+	movle r0, #0
+	strb r0, [r11, #0]
+        movle lr, r4
+	bxle lr
+
 
 	// otherwise display the bullet
 	bl locate @ This locate is erasing the r0 and r1
@@ -190,13 +191,6 @@ draw_bullet:
 	mov32 r1, bullet
 	mov r2, #bullet_Len
 	mov r7, #WRITE
-	svc #0
-
-	mov r0, #CLOCK_REALTIME
-	mov r1, #0
-	mov32 r2, timespec
-	mov r3, #0
-	movw r7, #CLOCK_NANOSLEEP
 	svc #0
 
 	mov lr, r4
@@ -247,16 +241,23 @@ hit_35_27:
 	// Add to the score
 //	bl hit
 
-	mov r6, #0          @ Kill the bullet
+	mov r0, #0          @ Kill the bullet
+	strb r0, [r11, #0]
+
 	mov lr, r4          @ put the return for the bullet function to lr
 
 	bx lr
 
 hit_33_29:
+	cmp r0, #5
+	bxne lr
+	
 	// Add to the score
 //	bl hit
 
-	mov r6, #0          @ Kill the bullet
+	mov r0, #0          @ Kill the bullet
+	strb r0, [r11, #0]
+
 	mov lr, r4          @ put the return for the bullet function to lr
 
 	bx lr
@@ -268,7 +269,9 @@ hit_34_32_31_30_28:
 	// Add to the score
 //	bl hit
 
-	mov r6, #0          @ Kill the bullet
+	mov r0, #0          @ Kill the bullet
+	strb r0, [r11, #0]
+
 	mov lr, r4          @ put the return for the bullet function to lr
 
 	bx lr
@@ -306,7 +309,7 @@ _start:
         mov r0, #0
         mov r1, #2000
         mov r2, #MAP_PROT
-        mov r3, #MAP_ANONYMOUS
+        mov r3, #MAP_FLAGS
         mov r4, #-1
         mov r5, #0
         mov r7, #MMAP2
@@ -314,9 +317,9 @@ _start:
 
 	mov r11, r0     @ Set r11 as the location of the mapped memory
 
-//	mov r0, #0
-//	strb r0, [r11]
-
+	mov r0, #0
+	strb r0, [r11]
+	
 while_loop:
 	// get movement from user
 	mov r7, #READ
@@ -325,7 +328,10 @@ while_loop:
 	mov r2, #1
 	svc #0
 
-
+	push {r0, r1}
+	bl draw_bullet
+	pop {r0, r1}
+	
 	// If nothing was read, don't bother writing
 	cmp r0, #0
 	beq skip_print
@@ -350,13 +356,22 @@ while_loop:
 continue_while_loop:
 	bl draw_player
 
-//	bl draw_bullet
+	//bl draw_bullet
 
 	bl draw_spider
 
 skip_print:
 	ldrb r0, [sp]
 
+	push {r0, r1}
+	mov r0, #CLOCK_REALTIME
+	mov r1, #0
+	mov32 r2, timespec
+	mov r3, #0
+	movw r7, #CLOCK_NANOSLEEP
+	svc #0
+	pop {r0, r1}
+	
 	cmp r0, #27        @ esc
 	bne while_loop
 
