@@ -7,7 +7,6 @@
 
 .include "mov32.inc"
 .include "system_calls.s"
-//.include "spider.s"
 
 @constant min bound
 .set MIN, 0
@@ -35,6 +34,7 @@ player:
 	.skip 1
 	.set lenY, .-lenX-player
 spider:
+	// fourth layer of spider
 	.byte 27
 	.ascii "[2C"
 	.ascii "/"
@@ -48,7 +48,7 @@ spider:
 	.ascii "[1B"
 	.byte 27
 	.ascii "[7D"
-	//.set spider_Len1, .-spider
+	// third layer of spider
 	.ascii "\\_\\(_)\/_/"
 	.byte 27
 	.ascii "[1B"
@@ -56,7 +56,7 @@ spider:
 	.ascii "[9D"
 	.byte 27
 	.ascii "[1C"
-	//.set spider_Len2, .-spider-spider_Len1
+	// second layer of spider
 	.ascii "_\/\/o\\\\_"
 	.byte 27
 	.ascii "[1B"
@@ -64,12 +64,11 @@ spider:
 	.ascii "[8D"
 	.byte 27
 	.ascii "[2C"
-	//.set spider_Len3, .-spider-spider_Len2
+	// first layer of spider
 	.ascii "\/"
 	.byte 27
 	.ascii "[3C"
 	.ascii "\\"
-	//.set spider_Len4, .-spider-spider_Len3
 	.set spider_Len, .-spider
 
 bullet:
@@ -134,8 +133,6 @@ init_bullet:
 	mov r0, r9      @ y pos
 	mov r1, r10     @ x pos
 
-//	sub r0, r0, #1      @ 1 higher than the character
-
 	strb r0, [r11, #0]
 	strb r1, [r11, #1]
 
@@ -195,23 +192,6 @@ draw_bullet:
 
 	mov lr, r4
 	bx lr
-
-
-/*
-draw_bullet:
-	mov r4, lr
-
-        pop {r0, r1, r6, r7}
-
-	// clear previous bullet
-	cmp r0, r9
-	blne clear_bullet
-
-	sub r0, r0, #1
-
-	push {r0, r1, r6, r7}
-
-*/
 
 
 check_collision:
@@ -355,8 +335,6 @@ while_loop:
 
 continue_while_loop:
 	bl draw_player
-
-	//bl draw_bullet
 
 	bl draw_spider
 
