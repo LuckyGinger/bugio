@@ -16,7 +16,7 @@
 .set MUNMMAP, 91
 .set PROT_READ, 1
 .set PROT_WRITE, 2
-//.set MAP_FLAGS, (PROT_READ | PROT_WRITE)
+.set MAP_PROT, (PROT_READ | PROT_WRITE)
 
 .set O_WRONLY, 1
 .set O_RDWR , 2
@@ -39,6 +39,7 @@ empty_mess:
 	.set empty_mess_Len, .-empty_mess
 you_placed:
 	.ascii "Congragulations you placed in the top 3.\n\0"
+	.ascii "     Please enter your name: \0"
 	.set you_placed_Len, .-you_placed
 // Delete later and add the one below
 user_score:
@@ -67,18 +68,27 @@ file_info:
 .global get_name
 get_name:
 	// Move cursor to middle of screen
-	mov r0, #9
-	mov r1, #25
-	bl locate
+@	mov r0, #9
+@	mov r1, #25
+@	bl locate
+
+	// Print a message to the user for input
+	mov r0, #STDOUT
+        mov32 r1, you_placed
+        mov r2, #you_placed_Len
+        mov r7, #WRITE
+        svc #0
+
+
 
 	// Get input from  user
 	mov r0, #STDIN
 	mov32 r1, user_name
-	mov r2, #32
+	mov r2, #10
 	mov r7, #READ
 	svc #0
 
-
+	bx lr
 /*	// Write to File Save for later
 	mov r0, r4
 	mov32 r1, userName
@@ -90,6 +100,7 @@ get_name:
 .text
 .global hit
 hit:
+	push {r0, r1}
 	// This function will count a kill point :)
 	mov32 r0, user_score
 	ldr r1, [r0] @ Here we are De-Referencing
@@ -98,6 +109,7 @@ hit:
 	@ Now add the new value back into label
 	str r1, [r0]
 
+	pop {r0, r1}
 	bx lr
 
 .balign 4
@@ -141,6 +153,9 @@ _start:
 	bl did_user_place // Did the user place in the top three
 
 	cmp r1, #1
+	bleq get_name
+	mov r1, r3 // move counter ro r1 instead
+	mov r2, r4 // move usersScore to r2 instead
 	bleq add_new_score
 	blne sorry_message // if r1 != 1 then they did place into top score file
 
@@ -161,7 +176,7 @@ unload_file:
 	// First allocate 2k of memory
 	mov r0, #0
 	mov r1, #2000
-	mov r2, #MAP_FLAGS
+	mov r2, #MAP_PROT
 	mov r3, #MAP_SHARED
 	mov r4, r6
 	mov r5, #0
@@ -237,17 +252,39 @@ compare_scores:
 
 	pop {r4, pc}
 
-add_new_score:
-	mov32 r1, file_info // Temporary memory holder
-	mov32 r2, user_name // Get user name
-	sub r3, r3, #15 // This shifts the pointer of memory to the begining line
-	str r2, [r1, r3] // This stores the name of user into the line hopefully
 
+@ At this point r0 = initial memory in mmap
+@		r1 = counter
+@		r2 = users score
+add_new_score:
+	mov32 r3, file_info // Temporary memory holder in .bss section
+	mov32 r4, user_name // Get user name in ascii style memory aka sucks
+	mov r5, #0
+	sub r1, r1, #14 // This shifts the pointer of memory to the begining of a line
+
+adding_score_loop:
+	cmp r1, r5
+	bne copy_old_info
+	beq add_new_info
+done_adding_score:
 	mov r0, #STDOUT
         mov32 r1, file_info
         mov r2, #9
         mov r7, #WRITE
         svc #0
+
+	bx lr
+
+copy_old_info:
+	ldm r0, {r8-r11} 	// Load 16 Bytes BUT our line is only 15 bytes
+	stm r3, {r8-r11}	// Store 16 bytes
+	add r5, #15		// This will take care of the extra byte above
+
+	cmp r5, #45
+	blt adding_score_loop
+	bgt done_adding_score
+add_new_info:
+
 
 
 sorry_message:
