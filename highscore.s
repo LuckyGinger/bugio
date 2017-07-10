@@ -132,9 +132,6 @@ loop:
 	subs r2, #1
 	bgt loop
 
-
-
-	//strb [
 	pop {r4-r7}
 
 .balign 4
