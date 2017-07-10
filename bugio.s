@@ -24,8 +24,6 @@ clearChar:
 	.set clear_body_len, .-clearChar
 space:
 	.ascii " "
-message:
-	.asciz "hit 40"
 gameKey:
 	.skip 4
 player:
@@ -231,7 +229,7 @@ hit_35_27:
 hit_33_29:
 	cmp r0, #5
 	bxne lr
-	
+
 	// Add to the score
 	bl hit
 
@@ -299,7 +297,7 @@ _start:
 
 	mov r0, #0
 	strb r0, [r11]
-	
+
 while_loop:
 	// get movement from user
 	mov r7, #READ
@@ -311,7 +309,7 @@ while_loop:
 	push {r0, r1}
 	bl draw_bullet
 	pop {r0, r1}
-	
+
 	// If nothing was read, don't bother writing
 	cmp r0, #0
 	beq skip_print
@@ -349,7 +347,7 @@ skip_print:
 	movw r7, #CLOCK_NANOSLEEP
 	svc #0
 	pop {r0, r1}
-	
+
 	cmp r0, #27        @ esc
 	bne while_loop
 
@@ -380,7 +378,7 @@ clear_player:
 	mov lr, r4
 	bx lr
 	
-	
+
 addUp:
 	bl clear_player
 	cmp r9, #21	        @ Added this to make guy not go past the floor
@@ -401,12 +399,3 @@ subDown:
 	cmp r9, #2		@ Added this code to stop guy from going to high
 	subgt r9, r9, #1
 	b continue_while_loop
-
-displaymessage:
-	mov r0, #STDOUT
-	mov32 r1, message
-	mov r2, #7
-	mov r7, #WRITE
-	svc #0
-
-	bx lr
