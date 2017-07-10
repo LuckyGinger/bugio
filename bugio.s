@@ -178,10 +178,12 @@ draw_bullet:
 	blls check_collision
 
 	// don't display the bullet if bullet gets to the top
-	cmp r0, #2
-	movle r6, #0
-        moveq lr, r4
-	bxeq lr
+	cmp r0, #1
+	movle r0, #0
+	strb r0, [r11, #0]
+        movle lr, r4
+	bxle lr
+
 
 	// otherwise display the bullet
 	bl locate @ This locate is erasing the r0 and r1
@@ -192,16 +194,8 @@ draw_bullet:
 	mov r7, #WRITE
 	svc #0
 
-	mov r0, #CLOCK_REALTIME
-	mov r1, #0
-	mov32 r2, timespec
-	mov r3, #0
-	movw r7, #CLOCK_NANOSLEEP
-	svc #0
-
-	b continue_while_loop
-//	mov lr, r4
-//	bx lr
+	mov lr, r4
+	bx lr
 
 
 /*
@@ -248,16 +242,19 @@ hit_35_27:
 	// Add to the score
 //	bl hit
 
-	mov r6, #0          @ Kill the bullet
+	mov r0, #0          @ Kill the bullet
 	mov lr, r4          @ put the return for the bullet function to lr
 
 	bx lr
 
 hit_33_29:
+	cmp r0, #5
+	bxne lr
+	
 	// Add to the score
 //	bl hit
 
-	mov r6, #0          @ Kill the bullet
+	mov r0, #0          @ Kill the bullet
 	mov lr, r4          @ put the return for the bullet function to lr
 
 	bx lr
@@ -269,7 +266,7 @@ hit_34_32_31_30_28:
 	// Add to the score
 //	bl hit
 
-	mov r6, #0          @ Kill the bullet
+	mov r0, #0          @ Kill the bullet
 	mov lr, r4          @ put the return for the bullet function to lr
 
 	bx lr
@@ -317,7 +314,7 @@ _start:
 
 	mov r0, #0
 	strb r0, [r11]
-
+	
 while_loop:
 	// get movement from user
 	mov r7, #READ
@@ -326,8 +323,10 @@ while_loop:
 	mov r2, #1
 	svc #0
 
-	//bl draw_bullet
-
+	push {r0, r1}
+	bl draw_bullet
+	pop {r0, r1}
+	
 	// If nothing was read, don't bother writing
 	cmp r0, #0
 	beq skip_print
@@ -352,13 +351,22 @@ while_loop:
 continue_while_loop:
 	bl draw_player
 
-	bl draw_bullet
+	//bl draw_bullet
 
 	bl draw_spider
 
 skip_print:
 	ldrb r0, [sp]
 
+	push {r0, r1}
+	mov r0, #CLOCK_REALTIME
+	mov r1, #0
+	mov32 r2, timespec
+	mov r3, #0
+	movw r7, #CLOCK_NANOSLEEP
+	svc #0
+	pop {r0, r1}
+	
 	cmp r0, #27        @ esc
 	bne while_loop
 
