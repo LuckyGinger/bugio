@@ -42,7 +42,7 @@ you_placed:
 	.ascii "     Please enter your name: \0"
 	.set you_placed_Len, .-you_placed
 sorry_message:
-	.ascii "Sorry but you suck\n     and did not place in the top 3\n\0"
+	.ascii "Sorry but you suck\n\t\tand did not place in the top 3\n\0"
 	.set sorry_message_Len, .-sorry_message
 
 .balign 4
@@ -69,9 +69,9 @@ file_info:
 get_name:
 	push {r0-r2, lr}
 	// Move cursor to middle of screen
-@	mov r0, #9
-@	mov r1, #25
-@	bl locate
+	mov r0, #9
+	mov r1, #16
+	bl locate
 
 	// Print a message to the user for input
 	mov r0, #STDOUT
@@ -322,18 +322,29 @@ add_new_info:
 	b adding_score_loop
 
 sorry_prompt:
+	mov r9, lr // Save lr to branch back later
+	mov r0, #9
+	mov r1, #19
+
+	mov r11, r3
+	bl locate
+	mov r3, r11
+
         mov r0, #STDOUT
         mov32 r1, sorry_message
         mov r2, #sorry_message_Len
         mov r7, #WRITE
         svc #0
 
+	mov lr, r9
+	bx lr
+
 display_scores:
 	push {r0, lr}
 
-	mov r0, #20 //  Middle
-	mov r1, #30 // Screen
-@Add this later	bl locate
+	mov r0, #9 //  Middle
+	mov r1, #19 // Screen
+	bl locate
 
 	// Print top 3 score from file pulled from memory for now.
 	mov r0, #STDOUT
