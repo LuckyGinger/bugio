@@ -42,7 +42,7 @@ you_placed:
 	.ascii "     Please enter your name: \0"
 	.set you_placed_Len, .-you_placed
 sorry_message:
-	.ascii "Sorry but you suck\n     and did not place in the top 3\0"
+	.ascii "Sorry but you suck\n     and did not place in the top 3\n\0"
 	.set sorry_message_Len, .-sorry_message
 
 .balign 4
@@ -163,7 +163,7 @@ loop:
 .text
 .global highscore
 highscore:
-	push {r4-r9}
+	push {r3-r9, lr}
 
 	bl open_file // returns the file descriptor in r0
 	mov r6, r0 // Need to save the file descriptor else where
@@ -185,10 +185,7 @@ highscore:
 
 	bl close_all_files
 
-	pop {r4-r9}
-	mov r7, #EXIT
-	svc #0
-
+	pop {r3-r9, pc}
 open_file:
 	mov32 r0, filename
 	movw r1, #FILE_FLAGS

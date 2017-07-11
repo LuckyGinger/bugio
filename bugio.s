@@ -356,6 +356,8 @@ skip_print:
 
 	bl cursor_show
 
+	bl highscore
+
 	bl reset_cursor
 
 	mov r7, #EXIT
