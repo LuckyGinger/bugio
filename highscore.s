@@ -42,20 +42,17 @@ you_placed:
 	.ascii "     Please enter your name: \0"
 	.set you_placed_Len, .-you_placed
 sorry_message:
-	.ascii "Sorry but you suck\n\0"
+	.ascii "Sorry but you suck\n     and did not place in the top 3\0"
 	.set sorry_message_Len, .-sorry_message
-// Delete later and add the one below
-user_score:
-	.word 19
 
 .balign 4
 .bss // any label created after this point will be be zeroed
 user_name:
-	.space 10
-//user_score:
-	//.space 4
-user_score_ascii:
+	.space 20
+user_score:
 	.space 4
+user_score_ascii:
+	.space 8
 file_info:
 	.space 10 // Name 1
 	.word 5 // Score 1
@@ -70,7 +67,7 @@ file_info:
 .text
 .global get_name
 get_name:
-	push {r0, lr}
+	push {r0-r2, lr}
 	// Move cursor to middle of screen
 @	mov r0, #9
 @	mov r1, #25
@@ -91,6 +88,7 @@ get_name:
 	svc #0
 
 	cmp r0, #10
+	bgt finish_spaces
 	subs r0, #1
 add_filler_spaces:
 	mov r2, #32
@@ -98,8 +96,8 @@ add_filler_spaces:
 	add r0, #1
 	cmp r0, #10
 	blt add_filler_spaces
-
-	pop {r0, pc}
+finish_spaces:
+	pop {r0-r2, pc}
 /*	// Write to File Save for later
 	mov r0, r4
 	mov32 r1, userName
@@ -163,8 +161,8 @@ loop:
 
 .balign 4
 .text
-.global _start
-_start:
+.global highscore
+highscore:
 	push {r4-r9}
 
 	bl open_file // returns the file descriptor in r0
@@ -178,11 +176,12 @@ _start:
 
 	cmp r1, #1
 	bleq get_name
+	cmp r1, #1
 	mov r1, r3 // move counter ro r1 instead
 	mov r2, r4 // move usersScore to r2 instead
 	blne sorry_prompt // if r1 != 1 then they did place into top score file
 	bleq add_new_score
-	bl display_scores
+	bleq display_scores
 
 	bl close_all_files
 
@@ -341,7 +340,7 @@ display_scores:
 
 	// Print top 3 score from file pulled from memory for now.
 	mov r0, #STDOUT
-	mov32 r1, file_info//r5
+	mov32 r1, file_info
 	mov r2, #100
 	mov r7, #WRITE
 	svc #0
@@ -364,12 +363,11 @@ display_empty_message:
 	pop {r4, pc}
 
 close_all_files:
-	sub r3, #45
-	ldm r3, {r4-r11}
-	
-	stm r0, {r4-r11}
-
-
+	mov32 r1, file_info
+	ldr r1, [r1]
+	cmp r1, #0
+	ldmne r1, {r1-r11}
+	stmne r0, {r1-r11}
 
 	mov r0, r0
 	movw r1, #2000
