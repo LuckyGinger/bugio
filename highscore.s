@@ -41,9 +41,12 @@ you_placed:
 	.ascii "Congragulations you placed in the top 3.\n\0"
 	.ascii "     Please enter your name: \0"
 	.set you_placed_Len, .-you_placed
+sorry_message:
+	.ascii "Sorry but you suck\n\0"
+	.set sorry_message_Len, .-sorry_message
 // Delete later and add the one below
 user_score:
-	.word 120
+	.word 19
 
 .balign 4
 .bss // any label created after this point will be be zeroed
@@ -55,11 +58,11 @@ user_score_ascii:
 	.space 4
 file_info:
 	.space 10 // Name 1
-	.word 4 // Score 1
+	.word 5 // Score 1
         .space 10 // Name 2
-        .word 4 // Score 2
+        .word 5 // Score 2
         .space 10 // Name 3
-        .word 4 // Score 3
+        .word 5 // Score 3
 
 
 
@@ -67,6 +70,7 @@ file_info:
 .text
 .global get_name
 get_name:
+	push {r0, lr}
 	// Move cursor to middle of screen
 @	mov r0, #9
 @	mov r1, #25
@@ -79,16 +83,23 @@ get_name:
         mov r7, #WRITE
         svc #0
 
-
-
 	// Get input from  user
 	mov r0, #STDIN
 	mov32 r1, user_name
-	mov r2, #10
+	mov r2, #20
 	mov r7, #READ
 	svc #0
 
-	bx lr
+	cmp r0, #10
+	subs r0, #1
+add_filler_spaces:
+	mov r2, #32
+	strb r2, [r1, r0]
+	add r0, #1
+	cmp r0, #10
+	blt add_filler_spaces
+
+	pop {r0, pc}
 /*	// Write to File Save for later
 	mov r0, r4
 	mov32 r1, userName
@@ -116,28 +127,44 @@ hit:
 .text
 .global score_to_ascii
 score_to_ascii:
-	push {r4-r7}
+	push {r3-r7, lr}
 
-	mov32 r4, user_score
-	ldr r5, [r4]
+	// r4 already has score in decimal already
+	mov r5, #0x3
 	mov r6, #10
-	mov r2, #-3
 loop:
-	sdiv r5, r5, r6
-	cmp r5, #10
-	mul r7, r6, r5
-	subs r7, r5, r7
+	mov r8, r2
+	sdiv r2, r2, r6
+	mul r7, r6, r2
+	subs r7, r8, r7
 	add r7, #48
-	strb r7, [r4, r2]
-	subs r2, #1
-	bgt loop
+	strb r7, [r3, r5]
+	subs r5, #1
+	cmp r2, #1
+	bge loop
 
-	pop {r4-r7}
+	mov r6, #32
+	cmp r5, #0
+	strgeb r6, [r3, r5]
+	sub r5, #1
+	cmp r5, #0
+	strgeb r6, [r3, r5]
+	sub r5, #1
+	cmp r5, #0
+	strgeb r6, [r3, r5]
+
+	// This will add a newline athe end of the line
+	mov r2, #10
+	add r3, #4
+	str r2, [r3]
+	add r3, #1
+
+	pop {r3-r7, pc}
 
 .balign 4
 .text
 .global _start
-highscore://_start:
+_start:
 	push {r4-r9}
 
 	bl open_file // returns the file descriptor in r0
@@ -153,8 +180,11 @@ highscore://_start:
 	bleq get_name
 	mov r1, r3 // move counter ro r1 instead
 	mov r2, r4 // move usersScore to r2 instead
+	blne sorry_prompt // if r1 != 1 then they did place into top score file
 	bleq add_new_score
-	blne sorry_message // if r1 != 1 then they did place into top score file
+	bl display_scores
+
+	bl close_all_files
 
 	pop {r4-r9}
 	mov r7, #EXIT
@@ -181,6 +211,7 @@ unload_file:
 	svc #0
 
 	mov r4, r0 // Keep the address of mmap.
+	mov r5, r0 // delete later maybe this is for the display message
 
 	// We can close the file here and keep mmap open.
 	mov r0, r6 // r6 = file descriptor
@@ -237,7 +268,6 @@ while_loop:
 	b while_loop
 finish_loop:
 	pop {r2, pc}
-
 compare_scores:
 	push {r4, lr}
 
@@ -250,45 +280,60 @@ compare_scores:
 	pop {r4, pc}
 
 
+
+
+
 @ At this point r0 = initial memory in mmap
 @		r1 = counter
 @		r2 = users score
 add_new_score:
+	push {r0, lr}
 	mov32 r3, file_info // Temporary memory holder in .bss section
 	mov32 r4, user_name // Get user name in ascii style memory aka sucks
 	mov r5, #0
 	sub r1, r1, #14 // This shifts the pointer of memory to the begining of a line
-
 adding_score_loop:
 	cmp r1, r5
 	bne copy_old_info
 	beq add_new_info
 done_adding_score:
-	mov r0, #STDOUT
-        mov32 r1, file_info
-        mov r2, #9
-        mov r7, #WRITE
-        svc #0
+	mov r6, #0
+	str r6, [r3]
 
-	bx lr
-
+	pop {r0, pc}
 copy_old_info:
+	cmp r5, #45
+	bge done_adding_score
 	ldm r0, {r8-r11} 	// Load 16 Bytes BUT our line is only 15 bytes
 	stm r3, {r8-r11}	// Store 16 bytes
 	add r5, #15		// This will take care of the extra byte above
 
+	add r0, #15 		// Move pointer from mmap
+	add r3, #15		// Move pointer from .bss section
 	cmp r5, #45
-	blt adding_score_loop
-	bgt done_adding_score
+	b adding_score_loop
 add_new_info:
+	ldm r4, {r8-r10}
+	stm r3, {r8-r10}
 
+	add r3, #10
+	bl score_to_ascii // returns address of ascii number in r2
 
+	add r5, #15
+	add r3, #5
+	cmp r5, #45
+	bge done_adding_score
+	b adding_score_loop
 
-sorry_message:
-
+sorry_prompt:
+        mov r0, #STDOUT
+        mov32 r1, sorry_message
+        mov r2, #sorry_message_Len
+        mov r7, #WRITE
+        svc #0
 
 display_scores:
-	push {r4, lr}
+	push {r0, lr}
 
 	mov r0, #20 //  Middle
 	mov r1, #30 // Screen
@@ -296,12 +341,12 @@ display_scores:
 
 	// Print top 3 score from file pulled from memory for now.
 	mov r0, #STDOUT
-	mov32 r1, file_info
+	mov32 r1, file_info//r5
 	mov r2, #100
 	mov r7, #WRITE
 	svc #0
 
-	pop {r4, pc}
+	pop {r0, pc}
 
 display_empty_message:
 	push {r4, lr}
@@ -317,3 +362,18 @@ display_empty_message:
         svc #0
 
 	pop {r4, pc}
+
+close_all_files:
+	sub r3, #45
+	ldm r3, {r4-r11}
+	
+	stm r0, {r4-r11}
+
+
+
+	mov r0, r0
+	movw r1, #2000
+	mov r7, #MUNMMAP
+	svc #0
+
+	bx lr
