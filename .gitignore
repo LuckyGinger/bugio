@@ -7,4 +7,4 @@
 *.exe
 *.o
 
-highscore.txt
+./highscore.txt
