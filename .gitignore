@@ -6,3 +6,5 @@
 # generated files
 *.exe
 *.o
+
+highscore.txt
