@@ -258,7 +258,7 @@ hit_34_32_31_30_28:
 .global reset_cursor
 reset_cursor:
 	mov r4, lr
-	mov r0, #23 @ y pos
+	mov r0, #26 @ y pos
 	mov r1, #0  @ x pos
 
 	bl locate
