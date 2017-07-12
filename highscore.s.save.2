@@ -39,10 +39,10 @@ empty_mess:
 	.set empty_mess_Len, .-empty_mess
 you_placed:
 	.ascii "Congragulations you placed in the top 3.\n\0"
-	.ascii "\tPlease enter your name: \0"
+	.ascii "     Please enter your name: \0"
 	.set you_placed_Len, .-you_placed
 sorry_message:
-	.ascii "Sorry but you suck\n\t\tand did not place in the top 3\n\0"
+	.ascii "Sorry but you suck\n     and did not place in the top 3\n\0"
 	.set sorry_message_Len, .-sorry_message
 
 .balign 4
@@ -68,11 +68,10 @@ file_info:
 .global get_name
 get_name:
 	push {r0-r2, lr}
-	mov r11, r3
 	// Move cursor to middle of screen
-	mov r0, #9
-	mov r1, #14
-	bl locate
+@	mov r0, #9
+@	mov r1, #25
+@	bl locate
 
 	// Print a message to the user for input
 	mov r0, #STDOUT
@@ -88,8 +87,6 @@ get_name:
 	mov r7, #READ
 	svc #0
 
-	mov r3, r11
-
 	cmp r0, #10
 	bgt finish_spaces
 	subs r0, #1
@@ -101,7 +98,12 @@ add_filler_spaces:
 	blt add_filler_spaces
 finish_spaces:
 	pop {r0-r2, pc}
-
+/*	// Write to File Save for later
+	mov r0, r4
+	mov32 r1, userName
+	mov r2, #6
+	mov r7, #WRITE
+	svc #0*/
 
 .balign 4
 .text
@@ -159,9 +161,9 @@ loop:
 
 .balign 4
 .text
-.global highscore
-highscore:
-	push {r3-r9, lr}
+.global _start
+_start:
+	push {r4-r9}
 
 	bl open_file // returns the file descriptor in r0
 	mov r6, r0 // Need to save the file descriptor else where
@@ -183,7 +185,10 @@ highscore:
 
 	bl close_all_files
 
-	pop {r3-r9, pc}
+	pop {r4-r9}
+	mov r7, #EXIT
+	svc #0
+
 open_file:
 	mov32 r0, filename
 	movw r1, #FILE_FLAGS
@@ -320,29 +325,18 @@ add_new_info:
 	b adding_score_loop
 
 sorry_prompt:
-	mov r9, lr // Save lr to branch back later
-	mov r0, #9
-	mov r1, #20
-
-	mov r11, r3
-	bl locate
-	mov r3, r11
-
         mov r0, #STDOUT
         mov32 r1, sorry_message
         mov r2, #sorry_message_Len
         mov r7, #WRITE
         svc #0
 
-	mov lr, r9
-	bx lr
-
 display_scores:
 	push {r0, lr}
 
-	mov r0, #13 //  Middle
-	mov r1, #20 // Screen
-	bl locate
+	mov r0, #20 //  Middle
+	mov r1, #30 // Screen
+@Add this later	bl locate
 
 	// Print top 3 score from file pulled from memory for now.
 	mov r0, #STDOUT
@@ -372,7 +366,6 @@ close_all_files:
 	mov32 r1, file_info
 	ldr r1, [r1]
 	cmp r1, #0
-	ldrne r1, =file_info
 	ldmne r1, {r1-r11}
 	stmne r0, {r1-r11}
 
