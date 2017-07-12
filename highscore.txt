@@ -1,4 +1,3 @@
 Master T   200
 THOM       100
-BOSSBABY    14
-
+bob         90
