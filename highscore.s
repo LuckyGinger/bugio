@@ -44,6 +44,9 @@ you_placed:
 sorry_message:
 	.ascii "Sorry but you suck\n\t\tand did not place in the top 3\n\0"
 	.set sorry_message_Len, .-sorry_message
+score_bar:
+	.ascii "Score: \0"
+	.set score_bar_Len, .-score_bar
 
 .balign 4
 .bss // any label created after this point will be be zeroed
@@ -117,10 +120,21 @@ hit:
 	str r1, [r0]
 	mov r4, r1
 
-	mov r0, #3
-	mov r1, #55
+	mov r0, #2
+	mov r1, #51
 
 	bl locate
+
+	mov r0, #STDOUT
+        mov32 r1, score_bar
+        mov r2, #10
+        mov r7, #WRITE
+        svc #0
+
+	mov r0, #2
+        mov r1, #58
+
+        bl locate
 
         mov r1, r4 // decimal score
 	mov r6, #10 // Constant Value
@@ -137,7 +151,6 @@ convert_ascii:
         sdiv r4, r4, r6 // x/10
         mul r7, r6, r4 // r7 = 10 * x
         subs r7, r8, r7 // r7 = x - r7
-pause:
         add r7, #48 // r7 + 48
         strb r7, [r3, r5]
 	sub r5, #1
@@ -145,7 +158,6 @@ pause:
         bgt convert_ascii
 
 	mov r0, #STDOUT
-	//mov r1, #49
 	mov32 r1, user_score_ascii
 	mov r2, #10
 	mov r7, #WRITE
