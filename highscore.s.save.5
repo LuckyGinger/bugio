@@ -107,7 +107,7 @@ finish_spaces:
 .text
 .global hit
 hit:
-	push {r0, r1, r4, lr}
+	push {r0, r1}
 	// This function will count a kill point :)
 	mov32 r0, user_score
 	ldr r1, [r0] @ Here we are De-Referencing
@@ -115,43 +115,9 @@ hit:
 
 	@ Now add the new value back into label
 	str r1, [r0]
-	mov r4, r1
 
-	mov r0, #3
-	mov r1, #55
-
-	bl locate
-
-        mov r1, r4 // decimal score
-	mov r6, #10 // Constant Value
-	mov r5, #0
-how_big:
-	sdiv r1, r1, r6
-	cmp r1, #0
-	addgt r5, #1
-	bgt how_big
-
-	mov32 r3, user_score_ascii
-convert_ascii:
-	mov r8, r4 // x
-        sdiv r4, r4, r6 // x/10
-        mul r7, r6, r4 // r7 = 10 * x
-        subs r7, r8, r7 // r7 = x - r7
-pause:
-        add r7, #48 // r7 + 48
-        strb r7, [r3, r5]
-	sub r5, #1
-        cmp r4, #0
-        bgt convert_ascii
-
-	mov r0, #STDOUT
-	//mov r1, #49
-	mov32 r1, user_score_ascii
-	mov r2, #10
-	mov r7, #WRITE
-	svc #0
-
-	pop {r0, r1, r4, pc}
+	pop {r0, r1}
+	bx lr
 
 .balign 4
 .text
@@ -374,8 +340,8 @@ sorry_prompt:
 display_scores:
 	push {r0, lr}
 
-	mov r0, #13 //  Middle
-	mov r1, #20 // Screen
+	mov r0, #12 //  Middle
+	mov r1, #0 // Screen
 	bl locate
 
 	// Print top 3 score from file pulled from memory for now.
