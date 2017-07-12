@@ -386,8 +386,8 @@ sorry_prompt:
 display_scores:
 	push {r0, lr}
 
-	mov r0, #13 //  Middle
-	mov r1, #20 // Screen
+	mov r0, #23 //  Middle
+	mov r1, #0 // Screen
 	bl locate
 
 	// Print top 3 score from file pulled from memory for now.
