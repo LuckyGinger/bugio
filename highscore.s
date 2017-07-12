@@ -367,6 +367,7 @@ add_new_info:
 
 sorry_prompt:
 	mov r9, lr // Save lr to branch back later
+	mov r8, r0
 	mov r0, #9
 	mov r1, #20
 
@@ -380,6 +381,18 @@ sorry_prompt:
         mov r7, #WRITE
         svc #0
 
+	mov r0, #23 //  Middle
+	mov r1, #0 // Screen
+	bl locate
+
+        // Print top 3 score from file pulled from memory for now.
+	mov r0, #STDOUT
+	mov r1, r8
+	mov r2, #100
+	mov r7, #WRITE
+	svc #0
+	
+	
 	mov lr, r9
 	bx lr
 
